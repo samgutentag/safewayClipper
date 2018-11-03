@@ -12,6 +12,7 @@
 
 
 from selenium import webdriver
+import os
 
 
 __author__ = "Sam Gutentag"
@@ -37,6 +38,10 @@ def main():
     driver.get("http://www.safeway.com")
 
     # login data
+    login_username = os.environ.get(f'SAFEWAY_USERNAME')
+    print(login_username)
+    login_password = os.environ.get(f'SAFEWAY_PASSWORD')
+    print(login_password)
 
 
 
