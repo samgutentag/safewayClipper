@@ -7,7 +7,6 @@
 
     Download Operating System SPecific Version!
 
-
 '''
 
 import os
@@ -16,19 +15,21 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 
-
 __author__ = "Sam Gutentag"
 __copyright__ = "Copyright 2018, Sam Gutentag"
 __credits__ = ["Sam Gutentag"]
 __license__ = "GPL"
-__version__ = "0.0.1"
+__version__ = "0.1.1"
 __maintainer__ = "Sam Gutentag"
 __email__ = "developer@samgutentag.com"
-__status__ = "Prototype"
+__status__ = 'Production'
 
 
 def click_offers_on_page(driver=None, page=None, button_class=None, scroll_limit=5):
 
+    '''
+        Scrolling and clicking elements with specified class tags
+    '''
 
     print('Loading page: %s' % page)
 
@@ -61,60 +62,64 @@ def click_offers_on_page(driver=None, page=None, button_class=None, scroll_limit
 
 def main():
 
-
-    # open a browser window with default/Firefox
-    # driver = webdriver.Firefox()
-    # driver.get("www.samgutentag.com")
-
     chromedriver = './chromedriver'
     driver = webdriver.Chrome(chromedriver)
     driver.get("https://www.safeway.com/CMS/account/login/")
 
     time.sleep(15)
 
+    '''
+    #===========================================================================
+    #       Input Your Details Here!
+    #===========================================================================
+    '''
+    login_username = None
+    login_password = None
+
     # login data
-    login_username = os.environ.get(f'SAFEWAY_USERNAME')
-    login_password = os.environ.get(f'SAFEWAY_PASSWORD')
+    if not login_username:
+        login_username = os.environ.get(f'SAFEWAY_USERNAME')
+    if not login_password:
+        login_password = os.environ.get(f'SAFEWAY_PASSWORD')
 
     print('Retrieved login credentials')
 
-    # refresh page
+    # refresh page - Safeway's login page doesnt load properly the first time
     print('refreshing page...')
     driver.refresh()
     time.sleep(5)
 
 
-    print('attempting login')
-    username = driver.find_element_by_id("input-email")
-    password = driver.find_element_by_id("password-password")
-    username.send_keys(login_username)
-    password.send_keys(login_password)
-
-    print('Entered fields...')
-
-    # click sign in button
-    login_attempt = driver.find_element_by_id("create-account-btn")
-    login_attempt.click()
-
-    print('login success?')
+    print('attempting login...')
+    try:
+        username = driver.find_element_by_id("input-email")
+        password = driver.find_element_by_id("password-password")
+        username.send_keys(login_username)
+        password.send_keys(login_password)
+        # click sign in button
+        login_attempt = driver.find_element_by_id("create-account-btn")
+        login_attempt.click()
+        print('login success!')
+    except Exception as e:
+        print('Whoops... Something went wrong.\n\t%s' % e)
+        return -1
 
     time.sleep(15)
-
 
     # Just For U
     just_for_U_offers = 'https://www.safeway.com/ShopStores/Justforu-Coupons.page#/category/all'
     add_button_class = 'lt-place-add-button'
     click_offers_on_page(driver=driver, page=just_for_U_offers, button_class=add_button_class, scroll_limit=50)
 
-    time.sleep(10)
+    time.sleep(15)
 
-    # club specials
+    # Club Specials
     club_special_offers = 'https://www.safeway.com/ShopStores/Justforu-YourClubSpecials.page?reloaded=true'
     add_button_class = 'lt-add-offer'
     click_offers_on_page(driver=driver, page=club_special_offers, button_class=add_button_class, scroll_limit=10)
 
-
     driver.quit()
+    print('All Done! Happy Shopping!')
 
 
 if __name__ == '__main__':
