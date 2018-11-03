@@ -62,8 +62,12 @@ def click_offers_on_page(driver=None, page=None, button_class=None, scroll_limit
 
 def main():
 
-    chromedriver = './chromedriver'
-    driver = webdriver.Chrome(chromedriver)
+    try:
+        chromedriver = './chromedriver'
+        driver = webdriver.Chrome(chromedriver)
+    except:
+        print('Could not find chromedriver, using Firefox instead') 
+        driver = webdriver.Firefox()
     driver.get("https://www.safeway.com/CMS/account/login/")
 
     time.sleep(15)
@@ -78,9 +82,9 @@ def main():
 
     # login data
     if not login_username:
-        login_username = os.environ.get(f'SAFEWAY_USERNAME')
+        login_username = os.environ.get('SAFEWAY_USERNAME')
     if not login_password:
-        login_password = os.environ.get(f'SAFEWAY_PASSWORD')
+        login_password = os.environ.get('SAFEWAY_PASSWORD')
 
     print('Retrieved login credentials')
 
