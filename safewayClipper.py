@@ -19,7 +19,7 @@ __author__ = "Sam Gutentag"
 __copyright__ = "Copyright 2018, Sam Gutentag"
 __credits__ = ["Sam Gutentag"]
 __license__ = "GPL"
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __maintainer__ = "Sam Gutentag"
 __email__ = "developer@samgutentag.com"
 __status__ = 'Production'
@@ -66,7 +66,7 @@ def main():
         chromedriver = './chromedriver'
         driver = webdriver.Chrome(chromedriver)
     except:
-        print('Could not find chromedriver, using Firefox instead') 
+        print('Could not find chromedriver, using Firefox instead')
         driver = webdriver.Firefox()
     driver.get("https://www.safeway.com/CMS/account/login/")
 
