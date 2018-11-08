@@ -113,6 +113,7 @@ def main():
     # Just For U
     just_for_U_offers = 'https://www.safeway.com/ShopStores/Justforu-Coupons.page#/category/all'
     add_button_class = 'lt-place-add-button'
+
     click_offers_on_page(driver=driver, page=just_for_U_offers, button_class=add_button_class, scroll_limit=50)
 
     time.sleep(15)
