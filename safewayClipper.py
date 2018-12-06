@@ -20,7 +20,7 @@ __author__ = "Sam Gutentag"
 __copyright__ = "Copyright 2018, Sam Gutentag"
 __credits__ = ["Sam Gutentag"]
 __license__ = "GPL"
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __maintainer__ = "Sam Gutentag"
 __email__ = "developer@samgutentag.com"
 __status__ = 'Developement'
@@ -46,8 +46,8 @@ def click_offers_on_page(driver=None, page=None, button_title=None, scroll_limit
     time.sleep(5)
 
     for i in range(0, scroll_limit+1):
-        if i % 10 == 0 or i == 0 or i == scroll_limit:
-            print(f'{i} of {scroll_limit}: Scrolling...')
+        # if i % 10 == 0 or i == 0 or i == scroll_limit:
+        #     print(f'{i} of {scroll_limit}: Scrolling...')
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(1)
 
