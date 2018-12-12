@@ -72,7 +72,7 @@ def click_offers_on_page(driver=None, page=None, button_title=None,
 
     for idx, button in enumerate(valid_buttons):
         # print('%d of %d:\t%s' % (idx, len(valid_buttons), button))
-        print(f'{idx} of {len(valid_buttons)}:\t{button}')
+        print(f'{idx+1} of {len(valid_buttons)}:\t{button}')
         try:
             button.click()
         except:
