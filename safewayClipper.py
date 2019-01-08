@@ -20,7 +20,7 @@ __author__ = "Sam Gutentag"
 __copyright__ = "Copyright 2018, Sam Gutentag"
 __credits__ = ["Sam Gutentag"]
 __license__ = "GPL"
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __maintainer__ = "Sam Gutentag"
 __email__ = "developer@samgutentag.com"
 __status__ = 'Developement'
@@ -91,7 +91,7 @@ def get_webdriver():
         driver = None
     return driver
 
-def login(driver=get_webdriver(), login_username = None, login_password = None):
+def login(driver = None, login_username = None, login_password = None):
 
     ''' Login to Safeway member portal, defaults to env variable credientials
 
@@ -158,7 +158,6 @@ def main():
     driver = click_offers_on_page(driver=driver, page=just_for_U_offers,
                             button_title=button_title, button_class=button_class)
 
-    driver.close()
     driver.quit()
     print('All Done! Happy Shopping!')
 
