@@ -20,7 +20,7 @@ __author__ = "Sam Gutentag"
 __copyright__ = "Copyright 2018, Sam Gutentag"
 __credits__ = ["Sam Gutentag"]
 __license__ = "GPL"
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __maintainer__ = "Sam Gutentag"
 __email__ = "developer@samgutentag.com"
 __status__ = 'Developement'
@@ -87,10 +87,11 @@ def get_webdriver():
         dir_path = os.path.dirname(os.path.realpath(__file__))
         chromedriver = f'{dir_path}/chromedriver'
 
-        options = webdriver.ChromeOptions()
-        options.add_argument('headless')
-
-        driver = webdriver.Chrome(chromedriver, chrome_options=options)
+        # options = webdriver.ChromeOptions()
+        # options.add_argument('headless')
+        #
+        # driver = webdriver.Chrome(chromedriver, chrome_options=options)
+        driver = webdriver.Chrome(chromedriver)
     except:
         # print(f'Could not find chromedriver')
         driver = None
