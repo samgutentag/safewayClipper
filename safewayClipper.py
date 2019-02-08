@@ -40,39 +40,39 @@ def click_offers_on_page(driver=None, page=None, button_title=None,
                                     before looking for buttons to 'click'
     '''
 
-    # print(f'Loading page: {page}')
+    print(f'Loading page: {page}')
 
     # load page url
     driver.get(page)
 
     time.sleep(5)
 
-    # print(f'Scrolling...')
+    print(f'Scrolling...')
     for i in range(0, scroll_limit+1):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(1)
 
     time.sleep(5)
 
-    # print(f'Getting buttons...')
+    print(f'Getting buttons...')
     add_buttons = driver.find_elements_by_xpath(f'//*[@title="{button_title}"]')
 
-    # print(f'Found {len(add_buttons)} buttons by searching text...')
+    print(f'Found {len(add_buttons)} buttons by searching text...')
 
     if len(add_buttons) < 1 and not button_class is None:
         add_buttons = driver.find_elements_by_class_name(button_class)
 
-    # print(f'Found {len(add_buttons)} total buttons by searching css class...')
+    print(f'Found {len(add_buttons)} total buttons by searching css class...')
 
     valid_buttons = [x for x in add_buttons if x.text == 'Add']
-    # print(f'Found {len(valid_buttons)} total buttons to click!')
+    print(f'Found {len(valid_buttons)} total buttons to click!')
 
     invalid_buttons = [x for x in add_buttons if x.text == 'Added']
-    # print(f'Found {len(invalid_buttons)} total buttons to ignore!')
+    print(f'Found {len(invalid_buttons)} total buttons to ignore!')
 
     for idx, button in enumerate(valid_buttons):
-        # # print('%d of %d:\t%s' % (idx, len(valid_buttons), button))
-        # print(f'{idx+1} of {len(valid_buttons)}:\t{button}')
+        # print('%d of %d:\t%s' % (idx, len(valid_buttons), button))
+        print(f'{idx+1} of {len(valid_buttons)}:\t{button}')
         try:
             button.click()
         except:
@@ -93,7 +93,7 @@ def get_webdriver():
         # driver = webdriver.Chrome(chromedriver, chrome_options=options)
         driver = webdriver.Chrome(chromedriver)
     except:
-        # print(f'Could not find chromedriver')
+        print(f'Could not find chromedriver')
         driver = None
     return driver
 
@@ -113,15 +113,15 @@ def login(driver = None, login_username = None, login_password = None):
     if not login_password:
         login_password = os.environ.get('SAFEWAY_PASSWORD')
 
-    # print(f'Retrieved login credentials')
+    print(f'Retrieved login credentials')
 
     # refresh page - Safeway's login page doesnt load properly the first time
-    # print('refreshing page...')
+    print('refreshing page...')
     driver.refresh()
     time.sleep(5)
 
 
-    # print(f'attempting login...')
+    print(f'attempting login...')
     try:
         username = driver.find_element_by_id("input-email")
         password = driver.find_element_by_id("password-password")
@@ -130,18 +130,18 @@ def login(driver = None, login_username = None, login_password = None):
         # click sign in button
         login_attempt = driver.find_element_by_id("create-account-btn")
         login_attempt.click()
-        # print(f'\tlogin success!')
+        print(f'\tlogin success!')
         return 0
 
     except Exception as e:
-        # print(f'Whoops... Something went wrong trying to login.\n\t{e}')
+        print(f'Whoops... Something went wrong trying to login.\n\t{e}')
         return -1
 
 def main():
 
     driver = get_webdriver()
     if not driver:
-        # print(f'ERROR: Could not assign Webdriver...')
+        print(f'ERROR: Could not assign Webdriver...')
         return -1
 
     driver.get("https://www.safeway.com/CMS/account/login/")
@@ -165,7 +165,7 @@ def main():
                             button_title=button_title, button_class=button_class)
 
     driver.quit()
-    # print('All Done! Happy Shopping!')
+    print('All Done! Happy Shopping!')
 
 if __name__ == '__main__':
     main()
