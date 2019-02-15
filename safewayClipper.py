@@ -48,8 +48,21 @@ def click_offers_on_page(driver=None, page=None, button_title=None,
     time.sleep(5)
 
     print(f'Scrolling...')
+    found_button_count = 0
+    previous_button_count = 0
     for i in range(0, scroll_limit+1):
+        # print(f'Scroll number {i}')
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        # get number of buttons, if does not increase after first 5 scrolls, stop scrolling
+        found_button_count = len(driver.find_elements_by_xpath(f'//*[@title="{button_title}"]'))
+        # print(f'Found {found_button_count} buttons so far...')
+        if i > 4:
+            # print(f'Found {found_button_count} buttons so far...')
+            if found_button_count > previous_button_count:
+                previous_button_count = found_button_count
+            else:
+                break
         time.sleep(1)
 
     time.sleep(5)
