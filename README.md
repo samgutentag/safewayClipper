@@ -1,9 +1,12 @@
 # Safeway Coupon Clipper
-
 ## A Simple tool to learn Selenium and Clip Grocery Coupons!
+---
+### Chrome Driver
 
-You will need to install ChromeDriver, download link here: [ChromeDriver Download](https://sites.google.com/a/chromium.org/chromedriver/)
+This project relies on the Chrome Driver to perform tasks with Selenium.
 
-Most recently tested version is 2.44
+You will need to download the latest [Chrome Driver at this Link](https://sites.google.com/a/chromium.org/chromedriver/downloads)
 
-Be sure to download Operating System Specific Version!
+Place the downloaded exe file at the root of this project directory or else you wil lneed to modify safewayClipper.py to point to the location you have chosen.
+
+Most recently approved/tested version of the ChromeDriver is 74.0.3729.6
