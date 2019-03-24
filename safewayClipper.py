@@ -96,18 +96,19 @@ def click_offers_on_page(driver=None, page=None, button_title=None,
 def get_webdriver():
     ''' setup webdriver, else set to None
     '''
-    try:
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        chromedriver = f'{dir_path}/chromedriver'
+    # try:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    chromedriver = f'{dir_path}/chromedriver'
 
-        # options = webdriver.ChromeOptions()
-        # options.add_argument('headless')
-        #
-        # driver = webdriver.Chrome(chromedriver, chrome_options=options)
-        driver = webdriver.Chrome(chromedriver)
-    except:
-        print(f'Could not find chromedriver')
-        driver = None
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+
+    driver = webdriver.Chrome(chromedriver, chrome_options=options)
+    # driver = webdriver.Chrome(chromedriver)
+
+    # except:
+    #     print(f'Could not find chromedriver')
+    #     driver = None
     return driver
 
 def login(driver = None, login_username = None, login_password = None):

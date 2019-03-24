@@ -9,4 +9,4 @@ You will need to download the latest [Chrome Driver at this Link](https://sites.
 
 Place the downloaded exe file at the root of this project directory or else you wil lneed to modify safewayClipper.py to point to the location you have chosen.
 
-Most recently approved/tested version of the ChromeDriver is 74.0.3729.6
+Most recent supported version of the ChromeDriver is 73.0.3683.68
