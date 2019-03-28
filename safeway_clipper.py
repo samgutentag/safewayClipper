@@ -13,7 +13,6 @@
 import os
 import time
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 
 
 __author__ = "Sam Gutentag"
@@ -27,14 +26,8 @@ __status__ = "Developement"
 # "Production", "Developement", "Prototype"
 
 
-def click_offers_on_page(
-    driver=None,
-    page=None,
-    button_title=None,
-    button_class=None,
-    scroll_limit=30,
-    scroll_min=10,
-):
+def click_offers_on_page(driver=None, page=None, button_title=None,
+                         button_class=None, scroll_limit=30, scroll_min=10):
 
     """ Scrolling and clicking elements with specified class tags
 
@@ -84,9 +77,11 @@ def click_offers_on_page(
         f'//*[@title="{button_title}"]'
     )
 
-    print(f"Found {len(add_buttons)} buttons by searching text...")
+    found_button_count = len(add_buttons)
 
-    if len(add_buttons) < 1 and not button_class is None:
+    print(f"Found {found_button_count} buttons by searching text...")
+
+    if found_button_count < 1 and not button_class is None:
         add_buttons = driver.find_elements_by_class_name(button_class)
 
     print(f"Found {len(add_buttons)} total buttons by searching css class...")
@@ -102,8 +97,8 @@ def click_offers_on_page(
         print(f"{idx+1} of {len(valid_buttons)}:\t{button}")
         try:
             button.click()
-        except:
-            pass
+        except Exception as ex:
+            print(f"{ex}")
 
     return driver
 
@@ -128,8 +123,8 @@ def get_webdriver(headless=False):
         else:
             driver = webdriver.Chrome(chromedriver)
 
-    except Exception as e:
-        print(f"Error: {e}")
+    except Exception as ex:
+        print(f"Error: {ex}")
         driver = None
     return driver
 
@@ -169,8 +164,8 @@ def login(driver=None, login_username=None, login_password=None):
         print(f"\tlogin success!")
         return 0
 
-    except Exception as e:
-        print(f"Whoops... Something went wrong trying to login.\n\t{e}")
+    except Exception as ex:
+        print(f"Whoops... Something went wrong trying to login.\n\t{ex}")
         return -1
 
 
@@ -194,19 +189,20 @@ def main():
     time.sleep(10)
 
     # Just For U
-    just_for_U_offers = "https://www.safeway.com/ShopStores/Justforu-Coupons.page#/category/all"
+    just_for_u_offers = "https://www.safeway.com/ShopStores/Justforu-Coupons.page#/category/all"
     button_title = "Add"
     button_class = "lt-place-add-button"
 
     driver = click_offers_on_page(
         driver=driver,
-        page=just_for_U_offers,
+        page=just_for_u_offers,
         button_title=button_title,
         button_class=button_class,
     )
 
     driver.quit()
     print("All Done! Happy Shopping!")
+    return 0
 
 
 if __name__ == "__main__":
