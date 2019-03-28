@@ -24,10 +24,17 @@ __version__ = "0.5.0"
 __maintainer__ = "Sam Gutentag"
 __email__ = "developer@samgutentag.com"
 __status__ = "Developement"
-    # "Production", "Developement", "Prototype"
+# "Production", "Developement", "Prototype"
 
-def click_offers_on_page(driver=None, page=None, button_title=None,
-                                        button_class=None, scroll_limit=30):
+
+def click_offers_on_page(
+    driver=None,
+    page=None,
+    button_title=None,
+    button_class=None,
+    scroll_limit=30,
+    scroll_min=10,
+):
 
     """ Scrolling and clicking elements with specified class tags
 
@@ -38,6 +45,7 @@ def click_offers_on_page(driver=None, page=None, button_title=None,
         button_class (string)   --  the css class of the button to "click"
         scroll_limit (int)      --  page scrolls <n> times to load content
                                     before looking for buttons to "click"
+        scroll_min (int)        --  ensure at least this many scrolls
     """
 
     print(f"Loading page: {page}")
@@ -50,16 +58,20 @@ def click_offers_on_page(driver=None, page=None, button_title=None,
     print(f"Scrolling...")
     found_button_count = 0
     previous_button_count = 0
-    for i in range(0, scroll_limit+1):
+    for i in range(0, scroll_limit + 1):
         # print(f"Scroll number {i}")
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);"
+        )
 
         # get number of buttons, if does not increase after first 5 scrolls, stop scrolling
-        found_button_count = len(driver.find_elements_by_xpath(f"//*[@title="{button_title}"]"))
+        found_button_count = len(
+            driver.find_elements_by_xpath(f'//*[@title="{button_title}"]')
+        )
         # print(f"Found {found_button_count} buttons so far...")
-        if i > 4:
+        if i > scroll_min:
             # print(f"Found {found_button_count} buttons so far...")
-            if found_button_count > previous_button_count:
+            if found_button_count != previous_button_count:
                 previous_button_count = found_button_count
             else:
                 break
@@ -68,7 +80,9 @@ def click_offers_on_page(driver=None, page=None, button_title=None,
     time.sleep(5)
 
     print(f"Getting buttons...")
-    add_buttons = driver.find_elements_by_xpath(f"//*[@title="{button_title}"]")
+    add_buttons = driver.find_elements_by_xpath(
+        f'//*[@title="{button_title}"]'
+    )
 
     print(f"Found {len(add_buttons)} buttons by searching text...")
 
@@ -93,25 +107,34 @@ def click_offers_on_page(driver=None, page=None, button_title=None,
 
     return driver
 
-def get_webdriver():
+
+def get_webdriver(headless=False):
     """ setup webdriver, else set to None
     """
     try:
         dir_path = os.path.dirname(os.path.realpath(__file__))
         chromedriver = f"{dir_path}/chromedriver"
 
-        options = webdriver.ChromeOptions()
-        options.add_argument("headless")
+        if headless:
 
-        driver = webdriver.Chrome(chromedriver, chrome_options=options)
-        # driver = webdriver.Chrome(chromedriver)
+            options = webdriver.ChromeOptions()
+            options.add_argument("headless")
+
+            driver = webdriver.Chrome(chromedriver, options=options)
+
+            # specify webdriver window resolution
+            driver.set_window_size(1440, 900)
+
+        else:
+            driver = webdriver.Chrome(chromedriver)
 
     except Exception as e:
         print(f"Error: {e}")
         driver = None
     return driver
 
-def login(driver = None, login_username = None, login_password = None):
+
+def login(driver=None, login_username=None, login_password=None):
 
     """ Login to Safeway member portal, defaults to env variable credientials
 
@@ -134,7 +157,6 @@ def login(driver = None, login_username = None, login_password = None):
     driver.refresh()
     time.sleep(5)
 
-
     print(f"attempting login...")
     try:
         username = driver.find_element_by_id("input-email")
@@ -151,9 +173,10 @@ def login(driver = None, login_username = None, login_password = None):
         print(f"Whoops... Something went wrong trying to login.\n\t{e}")
         return -1
 
+
 def main():
 
-    driver = get_webdriver()
+    driver = get_webdriver(headless=True)
     if not driver:
         print(f"ERROR: Could not assign Webdriver...")
         return -1
@@ -175,11 +198,16 @@ def main():
     button_title = "Add"
     button_class = "lt-place-add-button"
 
-    driver = click_offers_on_page(driver=driver, page=just_for_U_offers,
-                            button_title=button_title, button_class=button_class)
+    driver = click_offers_on_page(
+        driver=driver,
+        page=just_for_U_offers,
+        button_title=button_title,
+        button_class=button_class,
+    )
 
     driver.quit()
     print("All Done! Happy Shopping!")
+
 
 if __name__ == "__main__":
     main()
