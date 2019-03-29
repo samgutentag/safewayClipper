@@ -27,7 +27,7 @@ __status__ = "Developement"
 
 
 def click_offers_on_page(driver=None, headless=False, page=None, button_title=None,
-                         button_class=None, scroll_limit=30, scroll_min=10):
+                         button_class=None, scroll_limit=100, scroll_min=30):
 
     """ Scrolling and clicking elements with specified class tags
 
@@ -47,7 +47,7 @@ def click_offers_on_page(driver=None, headless=False, page=None, button_title=No
     # load page url
     driver.get(page)
 
-    time.sleep(5)
+    time.sleep(3)
 
     if not headless:
         print(f"Scrolling...")
@@ -69,7 +69,7 @@ def click_offers_on_page(driver=None, headless=False, page=None, button_title=No
                 break
         time.sleep(1)
 
-    time.sleep(5)
+    time.sleep(3)
 
     if not headless:
         print(f"Getting buttons...")
@@ -148,8 +148,20 @@ def login(driver=None, headless=False, login_username=None, login_password=None)
     # login data
     if not login_username:
         login_username = os.environ.get("SAFEWAY_USERNAME")
+    if len(login_username) == 0:
+        if headless:
+            return -1
+        else:
+            print("ERROR: 'login_username' was not passed or set in environment variables")
+            return -1
     if not login_password:
         login_password = os.environ.get("SAFEWAY_PASSWORD")
+    if len(login_password) == 0:
+        if headless:
+            return -1
+        else:
+            print("ERROR: 'login_password' was not passed or set in environment variables")
+            return -1
 
     if not headless:
         print(f"Retrieved login credentials")
@@ -158,7 +170,7 @@ def login(driver=None, headless=False, login_username=None, login_password=None)
     if not headless:
         print("refreshing page...")
     driver.refresh()
-    time.sleep(5)
+    time.sleep(3)
 
     if not headless:
         print(f"attempting login...")
@@ -195,7 +207,7 @@ def main():
 
     driver.get("https://www.safeway.com/CMS/account/login/")
 
-    time.sleep(5)
+    time.sleep(3)
 
     """
     #===========================================================================
@@ -203,7 +215,7 @@ def main():
     #===========================================================================
     """
     login(driver=driver, headless=headless)
-    time.sleep(10)
+    time.sleep(5)
 
     # Just For U
     just_for_u_offers = "https://www.safeway.com/ShopStores/Justforu-Coupons.page#/category/all"
