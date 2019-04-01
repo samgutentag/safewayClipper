@@ -99,11 +99,11 @@ def click_offers_on_page(driver=None, headless=False, page=None, button_title=No
     for idx, button in enumerate(valid_buttons):
         if not headless:
             print(f"{idx+1} of {len(valid_buttons)}:\t{button}")
-            try:
-                button.click()
-            except Exception as ex:
-                if not headless:
-                    print(f"{ex}")
+        try:
+            button.click()
+        except Exception as ex:
+            if not headless:
+                print(f"{ex}")
 
     return driver
 
