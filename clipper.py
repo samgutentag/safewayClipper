@@ -10,7 +10,7 @@ __author__ = "Sam Gutentag"
 __copyright__ = "Copyright 2018, Sam Gutentag"
 __credits__ = ["Sam Gutentag"]
 __license__ = "GPL"
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 __maintainer__ = "Sam Gutentag"
 __email__ = "developer@samgutentag.com"
 __status__ = "Developement"
@@ -110,7 +110,7 @@ def safeway_login(driver, username, password):
         return 0
 
 
-def find_coupons(driver):
+def clip_coupons(driver):
     """Navigate to offer page and collect coupon offers.
 
     Parameters
@@ -157,8 +157,6 @@ def find_coupons(driver):
     # collect coupons
     coupons = driver.find_elements_by_class_name("coupon-container")
 
-    offers_to_click = {}
-
     for coupon in coupons:
 
         # get add button
@@ -173,9 +171,15 @@ def find_coupons(driver):
             savings_class = "heading-offer-price"
             savings = coupon.find_elements_by_class_name(savings_class)
 
-            offers_to_click[coupon] = (savings[0].text, description[0].text)
+            print(f"{savings[0].text}\t{description[0].text}")
 
-    return offers_to_click
+            # click add button
+            try:
+                driver.execute_script("arguments[0].click();", add_button)
+            except Exception:
+                return -1
+
+    return 0
 
 
 def clipper():
@@ -183,23 +187,26 @@ def clipper():
     args = parse_arguments()
 
     driver = get_webdriver(headless=args["headless_mode"])
-
     if driver == -1:
-        # print("Something went wrong initializing the webdriver... quitting.")
+        if not args["headless_mode"]:
+            print("Something went wrong initializing webdriver... quitting.")
+        driver.quit()
         return -1
 
     login = safeway_login(driver, username=args['username'],
                           password=args['password'])
-
     if login == -1:
-        # print("Something went wrong logging in... quitting.")
+        if not args["headless_mode"]:
+            print("Something went wrong logging in... quitting.")
+        driver.quit()
         return -1
 
-    coupons = find_coupons(driver)
-
-    for k, v in coupons.items():
-        k.click()
-        # print(f"\t{v[0]} -> {v[1]}")
+    clip_status = clip_coupons(driver)
+    if clip_status == -1:
+        if not args["headless_mode"]:
+            print("Something went wrong clipping coupons... quitting.")
+        driver.quit()
+        return -1
 
     driver.quit()
 
