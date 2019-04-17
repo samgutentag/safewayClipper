@@ -171,7 +171,10 @@ def clip_coupons(driver):
             savings_class = "heading-offer-price"
             savings = coupon.find_elements_by_class_name(savings_class)
 
-            print(f"{savings[0].text}\t{description[0].text}")
+            try:
+                print(f"{savings[0].text}\t{description[0].text}")
+            except Exception:
+                pass
 
             # click add button
             try:
