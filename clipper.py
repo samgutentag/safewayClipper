@@ -110,7 +110,7 @@ def safeway_login(driver, username, password):
         return 0
 
 
-def clip_coupons(driver):
+def clip_coupons(driver, headless_mode=False):
     """Navigate to offer page and collect coupon offers.
 
     Parameters
@@ -172,7 +172,11 @@ def clip_coupons(driver):
             savings = coupon.find_elements_by_class_name(savings_class)
 
             try:
-                print(f"{savings[0].text}\t{description[0].text}")
+                if not headless_mode:
+                    print(f"{savings[0].text}\t{description[0].text}")
+                else:
+                    pass
+
             except Exception:
                 pass
 
@@ -204,7 +208,7 @@ def clipper():
         driver.quit()
         return -1
 
-    clip_status = clip_coupons(driver)
+    clip_status = clip_coupons(driver, headless_mode=args["headless_mode"])
     if clip_status == -1:
         if not args["headless_mode"]:
             print("Something went wrong clipping coupons... quitting.")
