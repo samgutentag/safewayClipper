@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """A tool for clipping Safeway coupons."""
 
-import os
 import argparse
+import os
 import time
+
 from selenium import webdriver
 
 __author__ = "Sam Gutentag"
 __copyright__ = "Copyright 2018, Sam Gutentag"
 __credits__ = ["Sam Gutentag"]
 __license__ = "GPL"
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 __maintainer__ = "Sam Gutentag"
 __email__ = "developer@samgutentag.com"
 __status__ = "Developement"
