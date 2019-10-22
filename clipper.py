@@ -38,7 +38,7 @@ __deprecated__ = False
 __license__ = "GPLv3"
 __maintainer__ = "Sam Gutentag"
 __status__ = "Developement"
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 # "Prototype", "Development", "Production", or "Legacy"
 
 
@@ -223,14 +223,14 @@ def clip_coupons(driver, headless_mode=False):
         #     "window.scrollTo(0, document.body.scrollHeight);"
         # )
 
-        # scroll until the load more button goe away
+        # scroll until the load more button goes away
         try:
             load_more_btn = driver.find_elements_by_class_name("load-more")[0]
             load_more_btn.click()
             time.sleep(5)
 
             # get add button count
-            btn_class = "coupon-clip-button"
+            btn_class = "grid-coupon-btn"
             add_buttons = driver.find_elements_by_class_name(btn_class)
             add_buttons = [b for b in add_buttons if b.text.lower() == "add"]
             add_button_count = len(add_buttons)
@@ -274,6 +274,7 @@ def clip_coupons(driver, headless_mode=False):
             try:
                 driver.execute_script("arguments[0].click();", add_button)
                 coupons_clipped += 1
+                time.sleep(1)
             except Exception:
                 pass
 
