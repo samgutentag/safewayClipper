@@ -33,12 +33,12 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
-__date__ = "2019/10/22"
+__date__ = "2019/10/30"
 __deprecated__ = False
 __license__ = "GPLv3"
 __maintainer__ = "Sam Gutentag"
 __status__ = "Developement"
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 # "Prototype", "Development", "Production", or "Legacy"
 
 
@@ -265,7 +265,9 @@ def clip_coupons(driver, headless_mode=False):
 
             try:
                 savings_text = savings[0].text
+                savings_text = savings_text.decode("utf-8").strip()
                 description_text = description[0].text
+                description_text = description_text.decode("utf-8").strip()
                 logging.info(f"\t[{idx+1:3} of {len(coupons_found):3}]\t{savings_text:20}\t{description_text}")
             except Exception:
                 pass
