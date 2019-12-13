@@ -50,7 +50,7 @@ from datetime import datetime
 
 from selenium import webdriver
 
-MIN_CHROME_DRIVER_VERSION = 77
+MIN_CHROME_DRIVER_VERSION = 79
 
 
 def setup_logging():
@@ -131,20 +131,22 @@ def get_webdriver(headless=False):
     logging.info(f"using webdriver version {DRIVER_VERSION}")
     logging.info(f"webdriver lcoated at: {chromedriver}")
 
-    if headless:
-        logging.info("running headless")
-        options = webdriver.ChromeOptions()
-        options.add_argument("headless")
+    try:
 
-        logging.info("initializing headless Chrome webdriver")
-        driver = webdriver.Chrome(chromedriver, options=options, service_log_path='/dev/null')
+        if headless:
+            logging.info("running headless")
+            options = webdriver.ChromeOptions()
+            options.add_argument("headless")
 
-        # specify webdriver window resolution, helps clicking
-        driver.set_window_size(1440, 900)
+            logging.info("initializing headless Chrome webdriver")
+            driver = webdriver.Chrome(chromedriver, options=options, service_log_path='/dev/null')
 
-    else:
-        logging.info("initializing Chrome webdriver")
-        driver = webdriver.Chrome(chromedriver, service_log_path='/dev/null')
+            # specify webdriver window resolution, helps clicking
+            driver.set_window_size(1440, 900)
+
+        else:
+            logging.info("initializing Chrome webdriver")
+            driver = webdriver.Chrome(chromedriver, service_log_path='/dev/null')
 
     logging.info("chromedriver ready.")
     return driver
