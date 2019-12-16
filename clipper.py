@@ -33,12 +33,12 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
-__date__ = "2019/10/30"
+__date__ = "2019/12/16"
 __deprecated__ = False
 __license__ = "GPLv3"
 __maintainer__ = "Sam Gutentag"
 __status__ = "Developement"
-__version__ = "0.7.2"
+__version__ = "0.7.3"
 # "Prototype", "Development", "Production", or "Legacy"
 
 
@@ -139,16 +139,18 @@ def get_webdriver(headless=False):
             options.add_argument("headless")
 
             logging.info("initializing headless Chrome webdriver")
-            driver = webdriver.Chrome(chromedriver, options=options, service_log_path='/dev/null')
+            driver = webdriver.Chrome(chromedriver, options=options, service_log_path="/dev/null")
 
             # specify webdriver window resolution, helps clicking
             driver.set_window_size(1440, 900)
 
         else:
             logging.info("initializing Chrome webdriver")
-            driver = webdriver.Chrome(chromedriver, service_log_path='/dev/null')
+            driver = webdriver.Chrome(chromedriver, service_log_path="/dev/null")
+    except:
+        return -1
 
-    logging.info("chromedriver ready.")
+    logging.info(f"chromedriver ready.")
     return driver
 
 
