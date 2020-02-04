@@ -2,11 +2,11 @@
 
 """Safeway Coupon Clipper using Selenium
 
-Uses a selenium driver Chrome browser to clip Safeway coupons. Relies on passed
-username and password else defualt sto environment variables. Offers page is
-dynamically loaded, so this script keeps track of new found coupons after each
-scroll and can be limited.  default behavior is to scroll until no more
-un-clipped coupons are found.
+Uses a selenium driver Firefox Gecko or Chrome browser to clip Safeway
+coupons. Relies on passed username and password else defualt sto environment
+variables. Offers page is dynamically loaded, so this script keeps track of
+new found coupons after each scroll and can be limited.  default behavior is
+to scroll until no more un-clipped coupons are found.
 
 This script is dumb, and relies on the the css Class of coupons and their
 buttons to identify click targets.  As the css changes, this script will need
@@ -33,12 +33,12 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
-__date__ = "2019/12/16"
+__date__ = "2020/02/04"
 __deprecated__ = False
 __license__ = "GPLv3"
 __maintainer__ = "Sam Gutentag"
 __status__ = "Developement"
-__version__ = "0.7.3"
+__version__ = "0.8.0"
 # "Prototype", "Development", "Production", or "Legacy"
 
 
@@ -47,10 +47,10 @@ import logging
 import os
 import time
 from datetime import datetime
-
 from selenium import webdriver
 
 MIN_CHROME_DRIVER_VERSION = 79
+MIN_GECKO_DRIVER_VERSION = 26
 
 
 def setup_logging():
@@ -89,6 +89,10 @@ def parse_arguments():
                         required=False, default=False,
                         help="run in headless browser mode.")
 
+    parser.add_argument("-driver", "--which_driver", dest="which_driver",
+                        required=False, default="gecko",
+                        help="Use gecko or chrome driver, gecko default.")
+
     parser.add_argument("-u", "--username", dest="username",
                         required=False,
                         default=os.environ.get("SAFEWAY_USERNAME"),
@@ -107,51 +111,86 @@ def parse_arguments():
     return args
 
 
-def get_webdriver(headless=False):
+def get_webdriver(which_driver="gecko", headless=False):
     """Initialize web driver.
 
     Parameters
+    which_driver (string): use either gecko or chrome webdriver.
     headless (bool): initialize webdriver in headless mode.
 
     """
-    DRIVER_VERSION = MIN_CHROME_DRIVER_VERSION
-
     driver_path = os.path.dirname(os.path.realpath(__file__))
-    chromedriver = os.path.join(driver_path,
-                                "webdrivers",
-                                f"chromedriver_{DRIVER_VERSION}")
 
-    while not os.path.exists(chromedriver):
-        DRIVER_VERSION += 1
+    # Gecko Driver Usage
+    if which_driver == "gecko":
+        geckodriver = os.path.join(driver_path,
+                                   "webdrivers",
+                                   f"geckodriver_{MIN_GECKO_DRIVER_VERSION}")
+        logging.info(f"using webdriver version {MIN_GECKO_DRIVER_VERSION}")
+        logging.info(f"webdriver located at: {geckodriver}")
 
+        try:
+
+            if headless:
+                logging.info("running headless")
+
+                options = webdriver.FirefoxOptions()
+                options.add_argument('-headless')
+
+                logging.info("initializing headless Gecko webdriver")
+                driver = webdriver.Firefox(executable_path=geckodriver,
+                                        firefox_options=options,
+                                        service_log_path="/dev/null")
+
+                # specify webdriver window resolution, helps clicking
+                driver.set_window_size(1440, 900)
+
+            else:
+
+                logging.info("initializing Gecko webdriver")
+                driver = webdriver.Firefox(executable_path=geckodriver,
+                                            service_log_path="/dev/null")
+
+        except Exception as err:
+            logging.debug(err)
+            return -1
+        logging.info(f"geckodriver ready.")
+        return driver
+
+    # ChromeDriver Usage
+    else:
         chromedriver = os.path.join(driver_path,
                                     "webdrivers",
-                                    f"chromedriver_{DRIVER_VERSION}")
+                                    f"chromedriver_{MIN_CHROME_DRIVER_VERSION}")
 
-    logging.info(f"using webdriver version {DRIVER_VERSION}")
-    logging.info(f"webdriver lcoated at: {chromedriver}")
+        logging.info(f"using webdriver version {MIN_CHROME_DRIVER_VERSION}")
+        logging.info(f"webdriver located at: {chromedriver}")
 
-    try:
+        try:
 
-        if headless:
-            logging.info("running headless")
-            options = webdriver.ChromeOptions()
-            options.add_argument("headless")
+            if headless:
+                logging.info("running headless")
+                options = webdriver.ChromeOptions()
+                options.add_argument("headless")
+                logging.info("initializing headless Chrome webdriver")
+                driver = webdriver.Chrome(chromedriver, options=options,
+                                          service_log_path="/dev/null")
 
-            logging.info("initializing headless Chrome webdriver")
-            driver = webdriver.Chrome(chromedriver, options=options, service_log_path="/dev/null")
+                # specify webdriver window resolution, helps clicking
+                driver.set_window_size(1440, 900)
 
-            # specify webdriver window resolution, helps clicking
-            driver.set_window_size(1440, 900)
+            else:
 
-        else:
-            logging.info("initializing Chrome webdriver")
-            driver = webdriver.Chrome(chromedriver, service_log_path="/dev/null")
-    except:
-        return -1
+                logging.info("initializing Chrome webdriver")
+                driver = webdriver.Chrome(chromedriver,
+                                          service_log_path="/dev/null")
 
-    logging.info(f"chromedriver ready.")
-    return driver
+        except Exception as err:
+            logging.debug(err)
+            return -1
+
+        logging.info(f"chromedriver ready.")
+        return driver
 
 
 def safeway_login(driver, username, password):
@@ -330,10 +369,11 @@ def clipper():
     args = parse_arguments()
 
     logging.info("getting web driver")
-    driver = get_webdriver(headless=args["headless_mode"])
+    driver = get_webdriver(which_driver=args["which_driver"],
+                           headless=args["headless_mode"])
 
     if driver == -1:
-        logging.critical("Something went wrong initializing webdriver... quitting.")
+        logging.critical(f"Something went wrong initializing {args['which_driver']} webdriver... quitting.")
         driver.quit()
         return -1
 
@@ -345,7 +385,8 @@ def clipper():
         driver.quit()
         return -1
 
-    coupons_clipped, coupons_found = clip_coupons(driver, headless_mode=args["headless_mode"])
+    coupons_clipped, coupons_found = clip_coupons(driver,
+                                                  headless_mode=args["headless_mode"])
     if coupons_clipped == -1:
         logging.critical("Something went wrong clipping coupons... quitting.")
         driver.quit()
