@@ -33,12 +33,12 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
-__date__ = "2020/02/04"
+__date__ = "2020/02/28"
 __deprecated__ = False
 __license__ = "GPLv3"
 __maintainer__ = "Sam Gutentag"
 __status__ = "Developement"
-__version__ = "0.8.0"
+__version__ = "0.8.1"
 # "Prototype", "Development", "Production", or "Legacy"
 
 
@@ -226,11 +226,12 @@ def safeway_login(driver, username, password):
     logging.info("attempting to log in")
     login_button = driver.find_element_by_id("btnSignIn")
     login_button.click()
+    time.sleep(5)
 
     # verify login by checking text in "sign-in-profile-text" button
-    time.sleep(10)
+    time.sleep(5)
     logging.info("verifying login status...")
-    login_button = driver.find_element_by_id("sign-in-profile-text")
+    login_button = driver.find_element_by_class_name("menu-nav__profile-button-sign-in-up")
 
     if login_button.text == "Sign In / Up":
         logging.critical("ERROR: Not logged in correctly")
@@ -258,8 +259,11 @@ def clip_coupons(driver, headless_mode=False):
     # scroll page to load all offers
     keep_scrolling = True
     add_buttons_found = 0
+    scrolls_remaining = 10
 
-    while keep_scrolling:
+    while keep_scrolling or scrolls_remaining > 0:
+
+        scrolls_remaining -= 1
 
         # # uncomment this if requiring a literal scroll
         # driver.execute_script(
@@ -273,7 +277,7 @@ def clip_coupons(driver, headless_mode=False):
             time.sleep(5)
 
             # get add button count
-            btn_class = "grid-coupon-btn"
+            btn_class = "grid-coupon-clip-button"
             add_buttons = driver.find_elements_by_class_name(btn_class)
             add_buttons = [b for b in add_buttons if b.text.lower() == "add"]
             add_button_count = len(add_buttons)
