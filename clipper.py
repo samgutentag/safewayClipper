@@ -226,10 +226,9 @@ def safeway_login(driver, username, password):
     logging.info("attempting to log in")
     login_button = driver.find_element_by_id("btnSignIn")
     login_button.click()
-    time.sleep(5)
 
     # verify login by checking text in "sign-in-profile-text" button
-    time.sleep(5)
+    time.sleep(10)
     logging.info("verifying login status...")
     login_button = driver.find_element_by_class_name("menu-nav__profile-button-sign-in-up")
 
