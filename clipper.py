@@ -377,7 +377,6 @@ def clipper():
 
     if driver == -1:
         logging.critical(f"Something went wrong initializing {args['which_driver']} webdriver... quitting.")
-        driver.quit()
         return -1
 
     login = safeway_login(driver,
