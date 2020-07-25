@@ -2,7 +2,7 @@
 
 """Safeway Coupon Clipper using Selenium
 
-Uses a selenium driver Firefox Gecko or Chrome browser to clip Safeway
+Uses a Selenium web driver Firefox Gecko or Chrome browser to clip Safeway
 coupons. Relies on passed username and password else defualt sto environment
 variables. Offers page is dynamically loaded, so this script keeps track of
 new found coupons after each scroll and can be limited.  default behavior is
@@ -16,7 +16,6 @@ Writes data log of the run datetime, number of coupons clipped, and the number
 of coupons found.  Keep in mind that this number of coupons found may be
 truncated from the total number of available coupons by the scroll limit.
 
-
 Use CalVer versioning from here https://calver.org/
 
 """
@@ -24,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2020.04.29dev"
+__version__ = "2020.07.24dev"
 # "dev", "alpha", "beta", "rc1"
 
 
@@ -66,7 +65,13 @@ def setup_logging():
 
 
 def parse_arguments():
-    """Parse arguments from command line."""
+    """Parse arguments from command line.
+
+    Returns:
+        args (dict): dictionary of input command line arguments
+
+    """
+
     logging.info("parsing command line arguements")
     parser = argparse.ArgumentParser(description=("Clipping coupons from "
                                                   "Safeway.com Just4U page."))
@@ -100,9 +105,18 @@ def parse_arguments():
 def get_webdriver(which_driver="gecko", headless=False):
     """Initialize web driver.
 
-    Parameters
-    which_driver (string): use either gecko or chrome webdriver.
-    headless (bool): initialize webdriver in headless mode.
+    Will use the Gecko web driver unless an "chrome" is passed to
+    the "which_driver" argument.
+
+    Args:
+        which_driver (string): use either gecko or chrome webdriver.
+        headless (bool): initialize webdriver in headless mode.
+
+    Returns:
+        driver (web driver object): -1 on failure
+
+    Raises:
+        Exception: something wrong with web driver
 
     """
     driver_path = os.path.dirname(os.path.realpath(__file__))
@@ -121,12 +135,12 @@ def get_webdriver(which_driver="gecko", headless=False):
                 logging.info("running headless")
 
                 options = webdriver.FirefoxOptions()
-                options.add_argument('-headless')
+                options.add_argument("-headless")
 
                 logging.info("initializing headless Gecko webdriver")
                 driver = webdriver.Firefox(executable_path=geckodriver,
-                                        firefox_options=options,
-                                        service_log_path="/dev/null")
+                                           firefox_options=options,
+                                           service_log_path="/dev/null")
 
                 # specify webdriver window resolution, helps clicking
                 driver.set_window_size(1440, 900)
@@ -135,7 +149,7 @@ def get_webdriver(which_driver="gecko", headless=False):
 
                 logging.info("initializing Gecko webdriver")
                 driver = webdriver.Firefox(executable_path=geckodriver,
-                                            service_log_path="/dev/null")
+                                           service_log_path="/dev/null")
 
         except Exception as err:
             logging.debug(err)
@@ -182,10 +196,16 @@ def get_webdriver(which_driver="gecko", headless=False):
 def safeway_login(driver, username, password):
     """Log in to safeway site.
 
-    Parameters
-    driver (webdriver): selenium webdriver session
-    username (string): username for login authentication
-    password (string): password for login authentication
+    Verifies login success by searching for a "Sign In/Up" button. If
+    this button is not found, assumes login was successful.
+
+    Args:
+        driver (webdriver): selenium webdriver session
+        username (string): username for login authentication
+        password (string): password for login authentication
+
+    Returns:
+        result (int): 0 on success, -1 on failure
 
     """
     logging.info("navigating to login page...")
@@ -229,8 +249,17 @@ def safeway_login(driver, username, password):
 def clip_coupons(driver, headless_mode=False):
     """Navigate to offer page and collect coupon offers.
 
-    Parameters
-    driver (webdriver): selenium webdriver session
+    First scrolls page to load more offers, will scroll 10 times or until no
+    new clip buttons are exposed, whichever is later. Once done scrolling will
+    start clipping found coupons with a 1 second pause between clicks to not
+    present as a bot.
+
+    Args:
+        driver (webdriver): selenium webdriver session
+
+    Returns:
+        (coupons_clipped, len(coupons_found)) (tuple of integers): count of
+            coupons clipped and coupons scanned for clipping
 
     """
     logging.info("starting coupon clipping")
@@ -246,6 +275,7 @@ def clip_coupons(driver, headless_mode=False):
     add_buttons_found = 0
     scrolls_remaining = 10
 
+    # coupon discovery
     while keep_scrolling or scrolls_remaining > 0:
 
         scrolls_remaining -= 1
@@ -281,6 +311,7 @@ def clip_coupons(driver, headless_mode=False):
 
     coupons_clipped = 0
 
+    # clipping coupons
     for idx, coupon in enumerate(coupons_found):
 
         # get add button
@@ -318,9 +349,14 @@ def clip_coupons(driver, headless_mode=False):
 def clip_counter(coupons_clipped, coupons_found):
     """Record to file the number of coupons clipped.
 
-    Parameters:
-    coupons_clipped (int): number of coupons clipped
-    coupons_found (int): total number of coupons found
+    Writes date lines to a file in the ./data/clipper_datafile_yyyyMM.csv
+    format of the current year and month. Appends new line each time and
+    creates a ./data/ directory if it does not already exist.
+
+    Args:
+        coupons_clipped (int): number of coupons clipped
+        coupons_found (int): total number of coupons found
+
     """
 
     # name of this file
@@ -354,7 +390,7 @@ def clip_counter(coupons_clipped, coupons_found):
 
 
 def clipper():
-    """Primary function. This should all be a class."""
+    """Primary function to clip coupons."""
     args = parse_arguments()
 
     logging.info("getting web driver")
@@ -366,22 +402,22 @@ def clipper():
         return -1
 
     login = safeway_login(driver,
-                          username=args['username'],
-                          password=args['password'])
+                          username=args["username"],
+                          password=args["password"])
     if login == -1:
         logging.critical("Something went wrong logging in... quitting.")
         driver.quit()
         return -1
 
-    coupons_clipped, coupons_found = clip_coupons(driver,
-                                                  headless_mode=args["headless_mode"])
-    if coupons_clipped == -1:
+    _clipped, _found = clip_coupons(driver,
+                                    headless_mode=args["headless_mode"])
+    if _clipped == -1:
         logging.critical("Something went wrong clipping coupons... quitting.")
         driver.quit()
         return -1
 
     # record clip counter
-    clip_counter(coupons_clipped, coupons_found)
+    clip_counter(_clipped, _found)
 
     driver.quit()
     logging.info("complete")
