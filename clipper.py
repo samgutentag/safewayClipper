@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2020.07.24dev"
+__version__ = "2020.08.06dev"
 # "dev", "alpha", "beta", "rc1"
 
 
@@ -315,7 +315,7 @@ def clip_coupons(driver, headless_mode=False):
     for idx, coupon in enumerate(coupons_found):
 
         # get add button
-        add_button_class = "grid-coupon-btn"
+        add_button_class = "grid-coupon-clip-button"
         add_button = coupon.find_elements_by_class_name(add_button_class)[0]
         if add_button.text.lower() == "add":
 
