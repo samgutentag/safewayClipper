@@ -19,20 +19,12 @@ Alternatively you can modify the `get_webdriver()` function in `clipper.py` to p
 
 ---
 
-## Help Optimizing Cron Jobs
+## "Automation" with Cron Jobs
 
-I have traditionally run `clipper.py` on a cron, or manually _when/if_ I remember to do so. To help not spam the Safeway website with my login and coupon checks, I allowed a cron to run the `clipper.py` script at 2am, 4am, 6am, 2pm, and 8pm every day for nearly two months while collecting clip counts.
-
-If you do the same (for a longer or shorter period of time optionally) you can then run the `reporter.py` script to generate a chart similar to this one:
-
-![Clipper Counts Chart](./charts/clipper_report.png)
-
-This is a Box and Whisker plot chart that helped me realize that Wednesdays are the best day to run the `clipper.py` script with Friday mornings (My routine shopping day) as a second pass.
+To help not spam the Safeway website with my login and coupon checks, I allow a cron to run the `clipper.py` script at 2am every day to complete the "automation" portion of the script.
 
 ---
 
 ## Requirements
 
-Running `clipper.py` will require a web driver (see above), and I reccomend using the `python -m pip install -f requirements.txt` command to install the needed packages.
-
-Running `reporter.py` will require at least one data file, more the better, and will require using the the `python -m pip install -f requirements_reporter.txt` command to install the needed packages.
+Running `clipper.py` will require a web driver (see above), and I reccomend using the `python -m pip install -r requirements.txt` command to install the other needed packages.
