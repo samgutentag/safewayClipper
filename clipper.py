@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2020.08.06dev"
+__version__ = "2020.08.15dev"
 # "dev", "alpha", "beta", "rc1"
 
 
@@ -251,15 +251,14 @@ def clip_coupons(driver, headless_mode=False):
 
     First scrolls page to load more offers, will scroll 10 times or until no
     new clip buttons are exposed, whichever is later. Once done scrolling will
-    start clipping found coupons with a 1 second pause between clicks to not
+    start clipping found coupons with a 0.5 second pause between clicks to not
     present as a bot.
 
     Args:
         driver (webdriver): selenium webdriver session
 
     Returns:
-        (coupons_clipped, len(coupons_found)) (tuple of integers): count of
-            coupons clipped and coupons scanned for clipping
+        clip_count (int): number of coupons clipped, -1 if none found
 
     """
     logging.info("starting coupon clipping")
@@ -270,123 +269,32 @@ def clip_coupons(driver, headless_mode=False):
 
     time.sleep(3)
 
-    # scroll page to load all offers
-    keep_scrolling = True
-    add_buttons_found = 0
-    scrolls_remaining = 10
+    # scroll page
+    scroll_count = 10
+    for i in range(scroll_count):
+        load_more_btn = driver.find_element_by_xpath('//button[text()="Load more"]')
+        load_more_btn.click()
+        time.sleep(2)
 
-    # coupon discovery
-    while keep_scrolling or scrolls_remaining > 0:
-
-        scrolls_remaining -= 1
-
-        # # uncomment this if requiring a literal scroll
-        # driver.execute_script(
-        #     "window.scrollTo(0, document.body.scrollHeight);"
-        # )
-
-        # scroll until the load more button goes away
-        try:
-            load_more_btn = driver.find_elements_by_class_name("load-more")[0]
-            load_more_btn.click()
-            time.sleep(5)
-
-            # get add button count
-            btn_class = "grid-coupon-clip-button"
-            add_buttons = driver.find_elements_by_class_name(btn_class)
-            add_buttons = [b for b in add_buttons if b.text.lower() == "add"]
-            add_button_count = len(add_buttons)
-
-            if add_button_count > add_buttons_found:
-                add_buttons_found = add_button_count
-            else:
-                keep_scrolling = False
-
-        except Exception:
-            keep_scrolling = False
-
-    # collect coupons
-    coupons_found = driver.find_elements_by_class_name("grid-coupon-container")
-    logging.info(f"found {len(coupons_found)} coupons.")
+    # get "Clip Coupon" buttons
+    try:
+        add_buttons = driver.find_element_by_xpath('//button[text()="Clip Coupon"]')
+        logging.info(f"found {add_buttons} coupons.")
+    except Exception:
+        logging.info(f"no coupons found.")
+        return 1
 
     coupons_clipped = 0
+    for btn in add_buttons:
+        if btn.text.lower() == "clip coupon":
 
-    # clipping coupons
-    for idx, coupon in enumerate(coupons_found):
+            driver.execute_script("arguments[0].click();", btn)
 
-        # get add button
-        add_button_class = "grid-coupon-clip-button"
-        add_button = coupon.find_elements_by_class_name(add_button_class)[0]
-        if add_button.text.lower() == "add":
+            coupons_clipped += 1
+            time.sleep(0.5)
 
-            # get description
-            description_class = "grid-coupon-description-text-title"
-            description = coupon.find_elements_by_class_name(description_class)
-
-            savings_class = "grid-coupon-heading-offer-price"
-            savings = coupon.find_elements_by_class_name(savings_class)
-
-            try:
-                savings_text = savings[0].text
-                savings_text = savings_text.decode("utf-8").strip()
-                description_text = description[0].text
-                description_text = description_text.decode("utf-8").strip()
-                logging.info(f"\t[{idx+1:3} of {len(coupons_found):3}]\t{savings_text:20}\t{description_text}")
-            except Exception:
-                pass
-
-            # click add button
-            try:
-                driver.execute_script("arguments[0].click();", add_button)
-                coupons_clipped += 1
-                time.sleep(1)
-            except Exception:
-                pass
-
-    return (coupons_clipped, len(coupons_found))
-
-
-def clip_counter(coupons_clipped, coupons_found):
-    """Record to file the number of coupons clipped.
-
-    Writes date lines to a file in the ./data/clipper_datafile_yyyyMM.csv
-    format of the current year and month. Appends new line each time and
-    creates a ./data/ directory if it does not already exist.
-
-    Args:
-        coupons_clipped (int): number of coupons clipped
-        coupons_found (int): total number of coupons found
-
-    """
-
-    # name of this file
-    this_file = os.path.splitext(os.path.basename(__file__))[0]
-    log_datetag = datetime.today().strftime("%Y%m")
-
-    # construct name of log file
-    data_file = f"{this_file}_datafile_{log_datetag}.csv"
-
-    # ensure logging directory exists
-    logging.info("ensuring data directory exists")
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-    data_dir = os.path.join(this_dir, "data")
-    if not os.path.isdir(data_dir):
-        os.makedirs(data_dir)
-
-    data_filepath = os.path.join(data_dir, data_file)
-
-    # append to datafile
-    logging.info(f"appending data record to datefile {data_filepath}")
-
-    log_datetime = datetime.today().strftime("%Y-%m-%d %H:%m:%S")
-    data_line = f"{log_datetime},{coupons_clipped},{coupons_found}\n"
-
-    new_file = not os.path.exists(data_filepath)
-
-    with open(data_filepath, "a") as f:
-        if new_file:
-            f.write("datetime,coupons_clipped,coupons_found\n")
-        f.write(data_line)
+    logging.info(f"clipped {coupons_clipped} coupons.")
+    return coupons_clipped
 
 
 def clipper():
@@ -409,15 +317,7 @@ def clipper():
         driver.quit()
         return -1
 
-    _clipped, _found = clip_coupons(driver,
-                                    headless_mode=args["headless_mode"])
-    if _clipped == -1:
-        logging.critical("Something went wrong clipping coupons... quitting.")
-        driver.quit()
-        return -1
-
-    # record clip counter
-    clip_counter(_clipped, _found)
+    clip_coupons(driver, headless_mode=args["headless_mode"])
 
     driver.quit()
     logging.info("complete")
