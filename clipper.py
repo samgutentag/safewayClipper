@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2020.08.15dev"
+__version__ = "2020.08.23dev"
 # "dev", "alpha", "beta", "rc1"
 
 
@@ -278,8 +278,8 @@ def clip_coupons(driver, headless_mode=False):
 
     # get "Clip Coupon" buttons
     try:
-        add_buttons = driver.find_element_by_xpath('//button[text()="Clip Coupon"]')
-        logging.info(f"found {add_buttons} coupons.")
+        add_buttons = driver.find_elements_by_xpath('//button[text()="Clip Coupon"]')
+        logging.info(f"found {len(add_buttons)} coupons.")
     except Exception:
         logging.info(f"no coupons found.")
         return 1
