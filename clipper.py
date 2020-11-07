@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2020.08.23dev"
+__version__ = "2020.11.07dev"
 # "dev", "alpha", "beta", "rc1"
 
 
@@ -32,6 +32,7 @@ import logging
 import os
 import time
 from datetime import datetime
+
 from selenium import webdriver
 
 MIN_CHROME_DRIVER_VERSION = 79
@@ -62,6 +63,14 @@ def setup_logging():
     # logging.disable(logging.CRITICAL)
     logging.info("\n\n\n\n")
     logging.info("-" * 80)
+
+
+def safe_print(msg="", headless=True):
+    """Print to console if in headless mode."""
+    if headless:
+        return
+    else:
+        print(msg)
 
 
 def parse_arguments():
@@ -262,9 +271,11 @@ def clip_coupons(driver, headless_mode=False):
 
     """
     logging.info("starting coupon clipping")
+    safe_print(msg="starting coupon clipping", headless=headless_mode)
     offer_url = "https://www.safeway.com/justforu/coupons-deals.html"
 
     logging.info(f"navigating to offers url: {offer_url}")
+    safe_print(msg=f"navigating to offers url: {offer_url}", headless=headless_mode)
     driver.get(offer_url)
 
     time.sleep(3)
@@ -280,8 +291,10 @@ def clip_coupons(driver, headless_mode=False):
     try:
         add_buttons = driver.find_elements_by_xpath('//button[text()="Clip Coupon"]')
         logging.info(f"found {len(add_buttons)} coupons.")
+        safe_print(msg=f"found {len(add_buttons)} coupons.", headless=headless_mode)
     except Exception:
         logging.info(f"no coupons found.")
+        safe_print(msg=f"no coupons found.", headless=headless_mode)
         return 1
 
     coupons_clipped = 0
@@ -294,6 +307,7 @@ def clip_coupons(driver, headless_mode=False):
             time.sleep(0.5)
 
     logging.info(f"clipped {coupons_clipped} coupons.")
+    safe_print(msg=f"clipped {coupons_clipped} coupons.", headless=headless_mode)
     return coupons_clipped
 
 
@@ -321,6 +335,7 @@ def clipper():
 
     driver.quit()
     logging.info("complete")
+    safe_print(msg=f"complete", headless=args["headless_mode"])
 
 
 if __name__ == "__main__":
