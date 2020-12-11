@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2020.11.07dev"
+__version__ = "2020.12.10dev"
 # "dev", "alpha", "beta", "rc1"
 
 
@@ -36,7 +36,7 @@ from datetime import datetime
 from selenium import webdriver
 
 MIN_CHROME_DRIVER_VERSION = 79
-MIN_GECKO_DRIVER_VERSION = 26
+MIN_GECKO_DRIVER_VERSION = 28
 
 
 def setup_logging():
@@ -163,7 +163,7 @@ def get_webdriver(which_driver="gecko", headless=False):
         except Exception as err:
             logging.debug(err)
             return -1
-        logging.info(f"geckodriver ready.")
+        logging.info("geckodriver ready.")
         return driver
 
     # ChromeDriver Usage
@@ -198,7 +198,7 @@ def get_webdriver(which_driver="gecko", headless=False):
             logging.debug(err)
             return -1
 
-        logging.info(f"chromedriver ready.")
+        logging.info("chromedriver ready.")
         return driver
 
 
@@ -275,7 +275,8 @@ def clip_coupons(driver, headless_mode=False):
     offer_url = "https://www.safeway.com/justforu/coupons-deals.html"
 
     logging.info(f"navigating to offers url: {offer_url}")
-    safe_print(msg=f"navigating to offers url: {offer_url}", headless=headless_mode)
+    safe_print(msg=f"navigating to offers url: {offer_url}",
+               headless=headless_mode)
     driver.get(offer_url)
 
     time.sleep(3)
@@ -291,10 +292,11 @@ def clip_coupons(driver, headless_mode=False):
     try:
         add_buttons = driver.find_elements_by_xpath('//button[text()="Clip Coupon"]')
         logging.info(f"found {len(add_buttons)} coupons.")
-        safe_print(msg=f"found {len(add_buttons)} coupons.", headless=headless_mode)
+        safe_print(msg=f"found {len(add_buttons)} coupons.",
+                   headless=headless_mode)
     except Exception:
-        logging.info(f"no coupons found.")
-        safe_print(msg=f"no coupons found.", headless=headless_mode)
+        logging.info("no coupons found.")
+        safe_print(msg="no coupons found.", headless=headless_mode)
         return 1
 
     coupons_clipped = 0
@@ -307,7 +309,8 @@ def clip_coupons(driver, headless_mode=False):
             time.sleep(0.5)
 
     logging.info(f"clipped {coupons_clipped} coupons.")
-    safe_print(msg=f"clipped {coupons_clipped} coupons.", headless=headless_mode)
+    safe_print(msg=f"clipped {coupons_clipped} coupons.",
+               headless=headless_mode)
     return coupons_clipped
 
 
@@ -335,7 +338,7 @@ def clipper():
 
     driver.quit()
     logging.info("complete")
-    safe_print(msg=f"complete", headless=args["headless_mode"])
+    safe_print(msg="complete", headless=args["headless_mode"])
 
 
 if __name__ == "__main__":
