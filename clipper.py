@@ -279,7 +279,7 @@ def clip_coupons(driver, headless_mode=False):
                headless=headless_mode)
     driver.get(offer_url)
 
-    time.sleep(3)
+    time.sleep(10)
 
     # scroll page
     scroll_count = 10
