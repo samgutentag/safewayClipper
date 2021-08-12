@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2020.12.10dev"
+__version__ = "2021.08.12dev"
 # "dev", "alpha", "beta", "rc1"
 
 
@@ -36,7 +36,7 @@ from datetime import datetime
 from selenium import webdriver
 
 MIN_CHROME_DRIVER_VERSION = 79
-MIN_GECKO_DRIVER_VERSION = 28
+MIN_GECKO_DRIVER_VERSION = 29
 
 
 def setup_logging():
