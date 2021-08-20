@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2021.08.12dev"
+__version__ = "2021.08.20dev"
 # "dev", "alpha", "beta", "rc1"
 
 
@@ -134,7 +134,7 @@ def get_webdriver(which_driver="gecko", headless=False):
     if which_driver == "gecko":
         geckodriver = os.path.join(driver_path,
                                    "webdrivers",
-                                   f"geckodriver_{MIN_GECKO_DRIVER_VERSION}")
+                                   f"geckodriver-{MIN_GECKO_DRIVER_VERSION}")
         logging.info(f"using webdriver version {MIN_GECKO_DRIVER_VERSION}")
         logging.info(f"webdriver located at: {geckodriver}")
 
