@@ -64,5 +64,5 @@ charts/
 
 # project specific #
 ####################
-webdrivers/*
+webdrivers/gecko*
 geckodriver.log
