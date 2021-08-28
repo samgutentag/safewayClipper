@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2021.08.20dev"
+__version__ = "2021.08.27dev"
 # "dev", "alpha", "beta", "rc1"
 
 
