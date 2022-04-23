@@ -23,8 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2021.10.13dev"
-# "dev", "alpha", "beta", "rc1"
+__version__ = "2022.04.23.0"
 
 
 import argparse
@@ -34,6 +33,7 @@ import time
 from datetime import datetime
 
 from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 
 MIN_CHROME_DRIVER_VERSION = 79
 MIN_GECKO_DRIVER_VERSION = 29
@@ -307,9 +307,12 @@ def clip_coupons(driver, headless_mode=False):
     # scroll page
     scroll_count = 10
     for i in range(scroll_count):
-        load_more_btn = driver.find_element_by_xpath('//button[text()="Load more"]')
-        load_more_btn.click()
-        time.sleep(2)
+        try:
+            load_more_btn = driver.find_element_by_xpath('//button[text()="Load more"]')
+            load_more_btn.click()
+            time.sleep(2)
+        except NoSuchElementException as e:
+            logging.infot(f"{e}")
 
     # get "Clip Coupon" buttons
     try:
