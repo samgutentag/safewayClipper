@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2022.04.23.0"
+__version__ = "2022.04.29.0"
 
 
 import argparse
@@ -312,7 +312,7 @@ def clip_coupons(driver, headless_mode=False):
             load_more_btn.click()
             time.sleep(2)
         except NoSuchElementException as e:
-            logging.infot(f"{e}")
+            logging.info(f"{e}")
 
     # get "Clip Coupon" buttons
     try:
