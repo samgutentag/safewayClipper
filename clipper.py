@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2022.04.29.0"
+__version__ = "2022.05.02.0"
 
 
 import argparse
@@ -349,7 +349,7 @@ def clipper():
 
     if driver == -1:
         logging.critical(
-            f"Something went wrong initializing {args['which_driver']} webdriver... quitting."
+            f"Error initializing {args['which_driver']} webdriver... quitting."
         )
         return -1
 
