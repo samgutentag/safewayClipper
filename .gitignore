@@ -66,3 +66,4 @@ charts/
 ####################
 webdrivers/gecko*
 geckodriver.log
+webdrivers/chrome*
