@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # open firefox window
-open -a /Applications/Firefox.app http://www.google.com\
+open -a /Applications/Google\ Chrome.app http://www.google.com\
 
 # activate env
 source $HOME/.virtualenvs/safewayClipper/bin/postactivate
@@ -14,7 +14,7 @@ sleep 2
 cd $HOME/Developer/safewayClipper
 
 # run script
-python clipper.py
+python clipper.py -driver chrome
 
 # deactivate
 source $HOME/.virtualenvs/safewayClipper/bin/predeactivate
