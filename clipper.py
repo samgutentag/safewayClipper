@@ -23,7 +23,7 @@ Use CalVer versioning from here https://calver.org/
 __authors__ = ["Sam Gutentag"]
 __email__ = "developer@samgutentag.com"
 __maintainer__ = "Sam Gutentag"
-__version__ = "2022.05.23.0"
+__version__ = "2022.07.05.0"
 
 
 import argparse
@@ -35,7 +35,7 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
-MIN_CHROME_DRIVER_VERSION = 101
+MIN_CHROME_DRIVER_VERSION = 103
 MIN_GECKO_DRIVER_VERSION = 29
 
 
