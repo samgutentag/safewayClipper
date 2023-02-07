@@ -35,7 +35,7 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
-MIN_CHROME_DRIVER_VERSION = 107
+MIN_CHROME_DRIVER_VERSION = 109
 MIN_GECKO_DRIVER_VERSION = 29
 
 
