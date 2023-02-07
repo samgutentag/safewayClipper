@@ -304,6 +304,16 @@ def clip_coupons(driver, headless_mode=False):
 
     time.sleep(10)
 
+    # click cookies banner away
+    try:
+        cookies_button = driver.find_element_by_class_name("onetrust-close-btn-handler")
+        cookies_button.click()
+        time.sleep(2)
+    except NoSuchElementException as e:
+        logging.info(f"{e}")
+
+    time.sleep(2)
+
     # scroll page
     scroll_count = 10
     for i in range(scroll_count):
