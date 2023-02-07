@@ -318,7 +318,8 @@ def clip_coupons(driver, headless_mode=False):
     scroll_count = 10
     for i in range(scroll_count):
         try:
-            load_more_btn = driver.find_element_by_xpath('//button[text()="Load more"]')
+            # load_more_btn = driver.find_element_by_xpath('//button[text()="Load more"]')
+            load_more_btn = driver.find_element_by_class_name("load-more-container")
             load_more_btn.click()
             time.sleep(2)
         except NoSuchElementException as e:
