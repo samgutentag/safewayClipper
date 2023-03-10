@@ -35,7 +35,7 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 
-MIN_CHROME_DRIVER_VERSION = 109
+MIN_CHROME_DRIVER_VERSION = 111
 MIN_GECKO_DRIVER_VERSION = 29
 
 
@@ -349,8 +349,14 @@ def clip_coupons(driver, headless_mode=False):
     return coupons_clipped
 
 
-def clipper():
-    """Primary function to clip coupons."""
+def clipper(src=None):
+    """Dear future me: we want to refactor this function, dont
+
+    The generator output is fine. Go spend our time somewhere else.
+
+    We don't know why the generator output fails and we have verified
+    its not worth the speed gains to figure it out."""
+
     args = parse_arguments()
 
     logging.info("getting web driver")
