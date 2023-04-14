@@ -1,4 +1,13 @@
-# Installing latest WebDrivers
+# So Long, thanks for all the Clips
+
+So Safeway implemented a captcha on log in and I don't have the time to resolve this.
+
+Was a fun project while it lasted! Maybe someday I'll come around to fixing it, but PRs are always
+welcome!
+
+---
+
+## Installing latest WebDrivers
 
 Gecko Driver can be installed from [here](https://github.com/mozilla/geckodriver/releases)
 
