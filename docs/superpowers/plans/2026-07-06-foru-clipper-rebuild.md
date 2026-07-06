@@ -16,13 +16,15 @@
 - No credentials stored on disk or in config, ever. Login happens only in a human-driven browser.
 - Session file and config file written with `0o600` permissions.
 - All session-file writes are atomic (write temp in same dir, then `os.replace`).
-- for-U API contract (confirmed against smkent/safeway-coupons, verified live in Task 1):
-  - Offers: `GET {base}/abs/pub/xapi/offers/companiongalleryoffer?storeId={storeId}&rand={rand}`
-  - Clip: `POST {base}/abs/pub/web/j4u/api/offers/clip?storeId={storeId}`
-  - Required headers: `Authorization: Bearer {accessToken}`, `X-SWY_API_KEY: emjou`, `X-SWY_VERSION: 1.1`, `X-SWY-APPLICATION-TYPE: web`; clip adds `Content-Type: application/json`.
-  - Access token + store id come from browser cookies `SWY_SHARED_SESSION` (`.accessToken`) and `SWY_SHARED_SESSION_INFO` (`.info.J4U.storeId`), each URL-encoded JSON.
-  - Clip body: `{"items": [{"clipType": "C", "itemId": <offerId>, "itemType": <offerPgm>}, {"clipType": "L", "itemId": <offerId>, "itemType": <offerPgm>}]}`. Success = response `items` non-empty and every item `status == 1`.
+- for-U API contract (CONFIRMED LIVE against vons.com 2026-07-06 — see tests/fixtures/README.md):
+  - Access token + store id come from browser cookies `SWY_SHARED_SESSION` (`.accessToken`) and `SWY_SHARED_SESSION_INFO` (`.info.J4U.storeId`), each URL-encoded JSON. (Confirmed: store 3326.)
+  - **Offers (GET):** `{base}/abs/pub/xapi/offers/companiongalleryoffer?storeId={storeId}&rand={rand}&includeRedmBonusPathFPOffers=true`
+    Headers: `Authorization: Bearer {accessToken}`, `Accept: application/json`, `Content-Type: application/vnd.safeway.v2+json`, `X-SWY_API_KEY: {api_key}`, `X-SWY_BANNER: {banner}`, `X-SWY_VERSION: 1.1`, `X-SWY-APPLICATION-TYPE: web`.
+  - **Clip (POST):** `{base}/abs/pub/web/j4u/api/offers/clip?storeId={storeId}` — routes through the IBM API gateway, DIFFERENT auth than the GET.
+    Headers: `swy_sso_token: {accessToken}` (NOT Authorization), `x-swyconsumerdirectorypro: {accessToken}` (same JWT again), `x-ibm-client-id: {ibm_client_id}`, `x-ibm-client-secret: {ibm_client_secret}`, `x-swy-correlation-id: {fresh uuid4}`, `X-SWY_API_KEY: {api_key}`, `X-SWY_BANNER: {banner}`, `X-SWY_VERSION: 1.0` (note: 1.0, not 1.1), `Content-Type: application/json`, `Accept: application/json, text/plain, */*`, `Origin: {base}`.
+  - Clip body (confirmed exact): `{"items": [{"clipType": "C", "itemId": <offerId>, "itemType": <offerPgm>}, {"clipType": "L", "itemId": <offerId>, "itemType": <offerPgm>}]}`. Success = response `items` non-empty and every item `status == 1` (reference-derived, confirmed live in Task 9).
   - Offer status: `"U"` unclipped, `"C"` clipped. Offer program (`offerPgm`): `SC`, `MF`, `PD`.
+  - **Credentials via config (gitignored), NOT hardcoded** (repo is public): `api_key` (value `emjou`), `banner`, `ibm_client_id`, `ibm_client_secret` all come from `config.toml`. Task 3's `Config` is extended with `api_key`, `ibm_client_id`, `ibm_client_secret` fields before Task 5.
 - Clip pacing: jittered delay 0.3 to 1.0s between clip POSTs.
 - Repo rewrite in place: delete `clipper.py`, `scriptRunner.sh`, `webdrivers/`, `requirements.txt` as part of Task 2.
 
@@ -473,15 +475,24 @@ git commit -m "feat: atomic session store with token/store-id decoding"
 - Create: `src/clipper/api.py`
 - Test: `tests/test_api.py`
 
+> **REVISED per Task 1 live capture (2026-07-06).** The original single-header design below
+> was reference-derived. The confirmed vons.com contract (see Global Constraints and
+> tests/fixtures/README.md) has DIFFERENT auth per endpoint: the GET uses `Authorization: Bearer`
+> + `X-SWY_VERSION: 1.1`; the clip POST uses `swy_sso_token` + `x-swyconsumerdirectorypro` +
+> IBM gateway creds (`x-ibm-client-id`/`x-ibm-client-secret`) + `X-SWY_VERSION: 1.0`. Creds come
+> from `Config` (gitignored), not hardcoded. The authoritative implementation for this task is in
+> `.superpowers/sdd/task-5-brief.md`, hand-authored from the live capture. The code block below is
+> retained for context but is superseded by the brief.
+
 **Interfaces:**
-- Consumes: `Session` from Task 4 (`access_token()`, `store_id()`, `cookies`); `base_url` string from Task 3.
+- Consumes: `Session` from Task 4 (`access_token()`, `store_id()`, `cookies`); `Config` from Task 3 (`base_url`, `banner`, `api_key`, `ibm_client_id`, `ibm_client_secret`).
 - Produces:
   - `@dataclass Offer` with `offer_id: str`, `status: str`, `name: str`, `offer_pgm: str`.
   - `Offer.is_unclipped() -> bool` (`status == "U"`).
   - `AuthExpired(Exception)` and `ClipError(Exception)`.
-  - `ForUClient(base_url: str, session: Session)`.
-  - `ForUClient.get_offers() -> list[Offer]`: GET companiongalleryoffer; raises `AuthExpired` on 401/403.
-  - `ForUClient.clip(offer: Offer) -> None`: POST clip; raises `AuthExpired` on 401/403, `ClipError` on unsuccessful body.
+  - `ForUClient(config: Config, session: Session)`.
+  - `ForUClient.get_offers() -> list[Offer]`: GET companiongalleryoffer (Bearer auth); raises `AuthExpired` on 401/403.
+  - `ForUClient.clip(offer: Offer) -> None`: POST clip (sso-token + IBM gateway auth); raises `AuthExpired` on 401/403, `ClipError` on unsuccessful body.
   - `ForUClient.refreshed_cookies() -> dict[str, str]`: current cookie jar as a dict (for write-back).
 
 - [ ] **Step 1: Write the failing test**
@@ -696,10 +707,12 @@ class ForUClient:
 Run: `pytest tests/test_api.py -v`
 Expected: PASS (4 tests)
 
-- [ ] **Step 5: Sanity-check field names against Task 1 fixtures**
+- [ ] **Step 5: Confirm header contract against the captured fixtures**
 
-Run: `python -c "import json; d=json.load(open('tests/fixtures/offers_sample.json')); print(list(d)[:3])"`
-Confirm the top-level key is `companionGalleryOfferList` and offer items carry `offerId`/`status`/`offerPgm`. If the live fixture differs, fix `Offer.from_dict` / `get_offers` and the test to match, then re-run Step 4.
+The offer-list response body was not captured in Task 1 (only requests). The parsed shape
+(`companionGalleryOfferList` array with `offerId`/`status`/`offerPgm`) is reference-derived and
+confirmed on the Task 9 live run. Verify instead that the request headers your client sends match
+`tests/fixtures/README.md` exactly (per-endpoint auth, versions, banner, IBM creds on clip only).
 
 - [ ] **Step 6: Commit**
 
