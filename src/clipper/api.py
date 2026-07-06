@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import random
 import uuid
 from dataclasses import dataclass
 
@@ -74,7 +75,7 @@ class ForUClient:
             url,
             params={
                 "storeId": self._store_id,
-                "rand": "654321",
+                "rand": str(random.randrange(100000, 999999)),
                 "includeRedmBonusPathFPOffers": "true",
             },
             headers=headers,
@@ -88,6 +89,11 @@ class ForUClient:
         ]
 
     def clip(self, offer: Offer) -> None:
+        if not self.config.ibm_client_id or not self.config.ibm_client_secret:
+            raise ClipError(
+                "Missing IBM gateway credentials (ibm_client_id / ibm_client_secret) "
+                "in the [api] section of config.toml; cannot clip."
+            )
         url = f"{self.base_url}/abs/pub/web/j4u/api/offers/clip"
         headers = {
             "swy_sso_token": self._token,

@@ -123,3 +123,16 @@ def test_clip_401_raises_authexpired():
     )
     with pytest.raises(AuthExpired):
         ForUClient(_config(), _session()).clip(Offer("1", "U", "Milk", "SC"))
+
+
+def test_clip_without_ibm_creds_raises_clear_error():
+    config_missing_id = Config(
+        banner="vons",
+        base_url=BASE,
+        session_path=Path("unused.json"),
+        api_key="emjou",
+        ibm_client_id=None,
+        ibm_client_secret="csecret",
+    )
+    with pytest.raises(ClipError, match="ibm_client_id"):
+        ForUClient(config_missing_id, _session()).clip(Offer("1", "U", "Milk", "MF"))
