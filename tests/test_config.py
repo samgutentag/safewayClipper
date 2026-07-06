@@ -27,3 +27,15 @@ def test_unknown_banner_raises(tmp_path):
     cfg_file.write_text('banner = "kroger"\nsession_path = "s.json"\n')
     with pytest.raises(ValueError):
         load_config(cfg_file)
+
+def test_missing_banner_raises_valueerror(tmp_path):
+    cfg_file = tmp_path / "config.toml"
+    cfg_file.write_text('session_path = "s.json"\n')
+    with pytest.raises(ValueError, match="banner"):
+        load_config(cfg_file)
+
+def test_missing_session_path_raises_valueerror(tmp_path):
+    cfg_file = tmp_path / "config.toml"
+    cfg_file.write_text('banner = "vons"\n')
+    with pytest.raises(ValueError, match="session_path"):
+        load_config(cfg_file)

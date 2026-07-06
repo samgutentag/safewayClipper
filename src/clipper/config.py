@@ -27,12 +27,17 @@ def load_config(path: Path | None = None) -> Config:
     with open(path, "rb") as f:
         raw = tomllib.load(f)
 
+    if "banner" not in raw:
+        raise ValueError(f"Missing required config key 'banner' in {path}")
     banner = raw["banner"]
     if banner not in BANNER_BASE_URLS:
         raise ValueError(
             f"Unknown banner {banner!r}; expected one of "
             f"{sorted(BANNER_BASE_URLS)}"
         )
+
+    if "session_path" not in raw:
+        raise ValueError(f"Missing required config key 'session_path' in {path}")
 
     pushover = raw.get("pushover", {})
     pi = raw.get("pi", {})
