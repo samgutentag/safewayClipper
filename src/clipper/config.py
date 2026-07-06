@@ -20,6 +20,9 @@ class Config:
     pi_ssh_host: str | None = None
     pi_session_path: str | None = None
     notify_on_success: bool = True
+    api_key: str = "emjou"
+    ibm_client_id: str | None = None
+    ibm_client_secret: str | None = None
 
 
 def load_config(path: Path | None = None) -> Config:
@@ -41,6 +44,7 @@ def load_config(path: Path | None = None) -> Config:
 
     pushover = raw.get("pushover", {})
     pi = raw.get("pi", {})
+    api = raw.get("api", {})
     return Config(
         banner=banner,
         base_url=BANNER_BASE_URLS[banner],
@@ -51,4 +55,7 @@ def load_config(path: Path | None = None) -> Config:
         pi_ssh_host=pi.get("ssh_host"),
         pi_session_path=pi.get("session_path"),
         notify_on_success=raw.get("notify_on_success", True),
+        api_key=api.get("key", "emjou"),
+        ibm_client_id=api.get("ibm_client_id"),
+        ibm_client_secret=api.get("ibm_client_secret"),
     )

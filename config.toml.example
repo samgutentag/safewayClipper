@@ -16,3 +16,12 @@ user = ""
 [pi]
 ssh_host = "pi@raspberrypi.local"
 session_path = "/home/pi/foru-clipper/session.json"
+
+# for-U API gateway credentials. Grab these from a logged-in vons.com request via
+# DevTools > Network > Copy as cURL: the x-swy_api_key, x-ibm-client-id, and
+# x-ibm-client-secret headers on the offers/clip POST. These are app-level constants
+# (not your login), kept here so they never land in the public repo.
+[api]
+key = "emjou"
+ibm_client_id = ""
+ibm_client_secret = ""
