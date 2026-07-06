@@ -1,0 +1,20 @@
+[project]
+name = "foru-clipper"
+version = "2026.7.6"
+description = "Clip Albertsons for-U coupons via a captured browser session"
+requires-python = ">=3.11"
+dependencies = ["requests>=2.31"]
+
+[project.optional-dependencies]
+capture = ["playwright>=1.44"]
+dev = ["pytest>=8", "responses>=0.25"]
+
+[project.scripts]
+clipper = "clipper.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

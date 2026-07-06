@@ -70,3 +70,9 @@ webdrivers/chrome*
 # superpowers derived review pages #
 ####################################
 docs/superpowers/**/*.html
+
+# runtime secrets / state (never commit) #
+###########################################
+session.json
+config.toml
+.superpowers/
