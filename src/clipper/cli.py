@@ -4,6 +4,7 @@ import argparse
 import json
 import logging
 import random
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -37,7 +38,16 @@ def run_clip(
     sleep_fn=time.sleep,
 ) -> int:
     notifier = Notifier(config.pushover_token, config.pushover_user)
-    session = load_session(config.session_path)
+    try:
+        session = load_session(config.session_path)
+    except (FileNotFoundError, SessionError) as e:
+        notifier.send(
+            "for-U clipper: no valid session",
+            f"Session file missing or invalid at {config.session_path}. "
+            "Run `clipper login` on the Mac.",
+            priority=1,
+        )
+        raise AuthExpired(str(e)) from e
     client = ForUClient(config, session)
 
     try:
@@ -111,7 +121,11 @@ def main(argv=None) -> int:
     sub.add_parser("status")
 
     args = parser.parse_args(argv)
-    config = load_config(Path(args.config) if args.config else None)
+    try:
+        config = load_config(Path(args.config) if args.config else None)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Config error: {e}", file=sys.stderr)
+        return 1
 
     if args.command == "login":
         from .capture import run_login
