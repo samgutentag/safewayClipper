@@ -1,45 +1,75 @@
-# Safeway Coupon Clipper
+# Safeway / Vons Coupon Clipper
 
-A simple tool to clip Safeway grocery coupons!
+Clips your digital for-U coupons automatically, so you don't have to sit there tapping "Clip
+Coupon" a hundred times before every grocery run.
 
----
+Works with any Albertsons banner (Safeway, Vons, Albertsons) since they all run the same platform.
+Which one you use is a single line of config.
 
-## Switch to the Firfox Gecko Driver
+## So Long, Selenium
 
-Originally this project used the Chrome Webdriver for Selenium instances. Given chromes updates, and
-fighting toggling auto update off constantly, I have migrated to using the Gecko Driver with
-Firefox. The minimum verion of Gecko Driver is 26.
+The original version of this drove a real browser with Selenium: log in, scroll the coupons page,
+click every button. It ran nightly for months until April 2023, when Safeway put a captcha on the
+login page and the whole thing fell over. The last commit message was literally `captcha'd EOL`.
 
-That said, using the `-driver chrome` argument will use the Chrome webdriver. This was lasted tested
-using Chrome Driver version 101.
+Since then login got harder, not easier. Vons now wants a password, sometimes a captcha, and an
+emailed one-time code. Automating your way through all of that is a losing fight.
 
-- The latest Chrome Driver can be downloaded from [Chromium](https://chromedriver.chromium.org)
-- The latest Gecko Driver can be downloaded from the
-  [Mozilla GitHub](https://github.com/mozilla/geckodriver/releases)
+So this rebuild stops fighting it. Instead of automating login, it automates the boring part and
+lets you do the login by hand, once.
 
-Once downloaded, place the Gecko Driver or Chrome Driver in the `./webdrivers/` directory. Format
-the name as `geckodriver-##`
+## How It Works
 
-Alternatively you can modify the `get_webdriver()` function in `clipper.py` to point to the location
-you have chosen.
+Two pieces:
 
----
+1. **Capture (on your Mac).** `clipper login` opens a real browser at the vons.com sign-in page.
+   You log in yourself, solving whatever it throws at you (password, captcha, the emailed code).
+   The tool grabs the resulting session and, if you've pointed it at a Pi, rsyncs it over.
+2. **Clip (on a Raspberry Pi).** Every night a cron job runs `clipper clip`, which replays that
+   session straight against the for-U JSON API with plain HTTP requests. No browser, no scrolling,
+   no clicking. It clips every unclipped coupon and moves on.
 
-## "Automation" with Cron Jobs
+The trick that makes a manual login worth it: the session tokens rotate as you use them, and every
+nightly run saves the refreshed cookies back. That stretches a single login from days to weeks.
+When it finally expires, you get a Pushover notification and run `clipper login` again.
 
-To help not spam the Safeway website with my login and coupon checks, I allow a cron to run the
-`clipper.py` script at 2am every day to complete the "automation" portion of the script.
+## Setup
 
----
+Install it (Playwright is only needed on the machine you log in from):
 
-## Requirements
+```bash
+# On the Mac you'll log in from:
+pip install '.[capture]'
+python -m playwright install chromium
 
-Running `clipper.py` will require a web driver (see above), and I reccomend using the
-`python -m pip install -r requirements.txt` command to install the other needed packages.
+# On the Pi that does the nightly clipping:
+pip install .
+```
 
-## Tips and Tricks
+Copy `config.toml.example` to `config.toml` and fill in your banner, the for-U API credentials
+(see the comments in that file for where to grab them), and your Pushover keys. Then:
 
-- Make sure the Chrome Driver suffix matches the `MIN_CHROME_DRIVER_VERSION` variable
-- on M1 Macs, control click the webdriver to authenticate and work around Apple Security Issues
-  - More information here:
-    [Apple can’t check app for malicious software](https://support.apple.com/guide/mac-help/apple-cant-check-app-for-malicious-software-mchleab3a043/mac)
+```bash
+clipper login    # on the Mac, logs in and pushes the session to the Pi
+clipper clip     # clips everything unclipped (add --dry-run to see what it would do)
+clipper status   # session age and last run result
+```
+
+Pi setup and the cron line are in [`deploy/README.md`](deploy/README.md).
+
+## A Note on Credentials
+
+The clip endpoint routes through Albertsons' API gateway and needs a couple of app-level
+credentials (an API key and an IBM gateway client id/secret). These aren't your login, they're
+constants baked into the vons.com web app, the same for every visitor. But since this repo is
+public they live in `config.toml`, which is gitignored, rather than in the source. Grab them from
+a logged-in request via DevTools once and you're set.
+
+Nothing with your password or session tokens is ever committed.
+
+## Design
+
+The full design and the confirmed API contract are in
+[`docs/superpowers/specs/`](docs/superpowers/specs/) and
+[`docs/superpowers/plans/`](docs/superpowers/plans/) if you want to see how it fits together or
+adapt it for your own banner.
