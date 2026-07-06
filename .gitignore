@@ -67,3 +67,6 @@ charts/
 webdrivers/gecko*
 geckodriver.log
 webdrivers/chrome*
+# superpowers derived review pages #
+####################################
+docs/superpowers/**/*.html
