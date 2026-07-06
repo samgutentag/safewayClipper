@@ -1,0 +1,18 @@
+# Which Albertsons banner. Determines the API base URL.
+banner = "vons"
+
+# Where the captured session lives on THIS machine.
+session_path = "session.json"
+
+# Send a low-priority push after successful runs too, not just failures.
+notify_on_success = true
+
+[pushover]
+# Prefer env vars PUSHOVER_TOKEN / PUSHOVER_USER over committing these.
+token = ""
+user = ""
+
+# Mac-only: where `clipper login` pushes the session after capture.
+[pi]
+ssh_host = "pi@raspberrypi.local"
+session_path = "/home/pi/foru-clipper/session.json"

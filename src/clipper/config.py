@@ -1,0 +1,49 @@
+import os
+import tomllib
+from dataclasses import dataclass
+from pathlib import Path
+
+BANNER_BASE_URLS = {
+    "vons": "https://www.vons.com",
+    "safeway": "https://www.safeway.com",
+    "albertsons": "https://www.albertsons.com",
+}
+
+
+@dataclass
+class Config:
+    banner: str
+    base_url: str
+    session_path: Path
+    pushover_token: str | None = None
+    pushover_user: str | None = None
+    pi_ssh_host: str | None = None
+    pi_session_path: str | None = None
+    notify_on_success: bool = True
+
+
+def load_config(path: Path | None = None) -> Config:
+    path = Path(path) if path else Path("config.toml")
+    with open(path, "rb") as f:
+        raw = tomllib.load(f)
+
+    banner = raw["banner"]
+    if banner not in BANNER_BASE_URLS:
+        raise ValueError(
+            f"Unknown banner {banner!r}; expected one of "
+            f"{sorted(BANNER_BASE_URLS)}"
+        )
+
+    pushover = raw.get("pushover", {})
+    pi = raw.get("pi", {})
+    return Config(
+        banner=banner,
+        base_url=BANNER_BASE_URLS[banner],
+        session_path=Path(raw["session_path"]),
+        pushover_token=os.environ.get("PUSHOVER_TOKEN")
+        or pushover.get("token"),
+        pushover_user=os.environ.get("PUSHOVER_USER") or pushover.get("user"),
+        pi_ssh_host=pi.get("ssh_host"),
+        pi_session_path=pi.get("session_path"),
+        notify_on_success=raw.get("notify_on_success", True),
+    )
