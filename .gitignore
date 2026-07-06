@@ -60,13 +60,8 @@ charts/
 
 # python pycache files #
 ########################
-*/__pycache__/*
-
-# project specific #
-####################
-webdrivers/gecko*
-geckodriver.log
-webdrivers/chrome*
+__pycache__/
+*.egg-info/
 # superpowers derived review pages #
 ####################################
 docs/superpowers/**/*.html
