@@ -968,7 +968,7 @@ def run_clip(
 ) -> int:
     notifier = Notifier(config.pushover_token, config.pushover_user)
     session = load_session(config.session_path)
-    client = ForUClient(config.base_url, session)
+    client = ForUClient(config, session)
 
     try:
         offers = client.get_offers()
