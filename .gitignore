@@ -70,4 +70,6 @@ docs/superpowers/**/*.html
 ###########################################
 session.json
 config.toml
+runs.jsonl
+.clip.lock
 .superpowers/

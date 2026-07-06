@@ -39,7 +39,8 @@ session and rsyncs it to the Pi automatically, as long as you set `[pi] ssh_host
 
 `deploy/crontab.example` has the line. Install it with `crontab -e` and point the path at your
 clone. It runs `clipper clip` at 2am, wrapped in `flock` so a slow run never stacks on top of the
-next one, and appends output to `logs/cron.log`.
+next one, and appends output to `logs/cron.log`. The `logs/` directory is created automatically by
+the cron line (`mkdir -p logs`), so there's nothing to set up by hand.
 
 ## When it stops working
 

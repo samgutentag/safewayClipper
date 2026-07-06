@@ -6,7 +6,7 @@ import responses
 from clipper.api import AuthExpired
 from clipper.cli import main, run_clip
 from clipper.config import Config
-from clipper.session import Session, save_session
+from clipper.session import Session, load_session, save_session
 
 BASE = "https://www.vons.com"
 
@@ -117,3 +117,92 @@ def test_main_bad_config_returns_1(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     rc = main(["--config", str(tmp_path / "nonexistent.toml"), "clip"])
     assert rc == 1
+
+
+@responses.activate
+def test_clip_writeback_roundtrips_valid_session(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    responses.add(
+        responses.GET,
+        f"{BASE}/abs/pub/xapi/offers/companiongalleryoffer",
+        json={
+            "companionGalleryOfferList": [
+                {"offerId": "1", "status": "U", "name": "Milk", "offerPgm": "SC"},
+            ]
+        },
+        status=200,
+    )
+    responses.add(
+        responses.POST,
+        f"{BASE}/abs/pub/web/j4u/api/offers/clip",
+        json={"items": [{"status": 1}, {"status": 1}]},
+        status=200,
+    )
+    config = _config(tmp_path)
+    clipped = run_clip(config, dry_run=False, sleep_fn=lambda s: None)
+    assert clipped == 1
+    reloaded = load_session(config.session_path)
+    assert reloaded.access_token()
+
+
+@responses.activate
+def test_get_offers_http_error_notifies_and_raises(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    responses.add(
+        responses.GET,
+        f"{BASE}/abs/pub/xapi/offers/companiongalleryoffer",
+        status=500,
+    )
+    responses.add(
+        responses.POST,
+        "https://api.pushover.net/1/messages.json",
+        json={"status": 1},
+        status=200,
+    )
+    config = _config(tmp_path)
+    config.pushover_token = "tok"
+    config.pushover_user = "user"
+    with pytest.raises(Exception):
+        run_clip(config, dry_run=False, sleep_fn=lambda s: None)
+
+    pushover_calls = [
+        c for c in responses.calls if "api.pushover.net" in c.request.url
+    ]
+    assert len(pushover_calls) == 1
+    body = pushover_calls[0].request.body
+    if isinstance(body, bytes):
+        body = body.decode()
+    assert "priority=1" in body
+
+
+@responses.activate
+def test_one_clip_http_error_does_not_abort_batch(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    responses.add(
+        responses.GET,
+        f"{BASE}/abs/pub/xapi/offers/companiongalleryoffer",
+        json={
+            "companionGalleryOfferList": [
+                {"offerId": "1", "status": "U", "name": "Milk", "offerPgm": "SC"},
+                {"offerId": "2", "status": "U", "name": "Eggs", "offerPgm": "MF"},
+            ]
+        },
+        status=200,
+    )
+    responses.add(
+        responses.POST,
+        f"{BASE}/abs/pub/web/j4u/api/offers/clip",
+        status=500,
+    )
+    responses.add(
+        responses.POST,
+        f"{BASE}/abs/pub/web/j4u/api/offers/clip",
+        json={"items": [{"status": 1}, {"status": 1}]},
+        status=200,
+    )
+    clipped = run_clip(_config(tmp_path), dry_run=False, sleep_fn=lambda s: None)
+    assert clipped == 1
+    runs_path = tmp_path / "runs.jsonl"
+    assert runs_path.exists()
+    last_line = json.loads(runs_path.read_text().strip().splitlines()[-1])
+    assert last_line["failed"] == 1

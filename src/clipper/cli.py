@@ -9,7 +9,9 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .api import AuthExpired, ClipError, ForUClient
+import requests
+
+from .api import ApiError, AuthExpired, ClipError, ForUClient
 from .config import Config, load_config
 from .notify import Notifier
 from .session import SessionError, load_session, save_session
@@ -40,6 +42,7 @@ def run_clip(
     notifier = Notifier(config.pushover_token, config.pushover_user)
     try:
         session = load_session(config.session_path)
+        client = ForUClient(config, session)
     except (FileNotFoundError, SessionError) as e:
         notifier.send(
             "for-U clipper: no valid session",
@@ -48,7 +51,6 @@ def run_clip(
             priority=1,
         )
         raise AuthExpired(str(e)) from e
-    client = ForUClient(config, session)
 
     try:
         offers = client.get_offers()
@@ -56,6 +58,13 @@ def run_clip(
         notifier.send(
             "for-U clipper: session expired",
             "Run `clipper login` on the Mac to refresh the session.",
+            priority=1,
+        )
+        raise
+    except (requests.RequestException, ApiError) as e:
+        notifier.send(
+            "for-U clipper: run failed",
+            f"Could not fetch offers: {e}",
             priority=1,
         )
         raise
@@ -76,7 +85,7 @@ def run_clip(
                 priority=1,
             )
             raise
-        except ClipError as e:
+        except (ClipError, requests.RequestException) as e:
             failed += 1
             logger.warning("clip failed: %s", e)
         sleep_fn(random.uniform(0.3, 1.0))
@@ -137,6 +146,9 @@ def main(argv=None) -> int:
             return 0
         except AuthExpired:
             return 2
+        except Exception as e:
+            print(f"clip failed: {e}", file=sys.stderr)
+            return 1
     if args.command == "status":
         return _cmd_status(config)
     return 1

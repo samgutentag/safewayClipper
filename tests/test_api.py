@@ -7,7 +7,7 @@ import responses
 
 from clipper.config import Config
 from clipper.session import Session
-from clipper.api import ForUClient, Offer, AuthExpired, ClipError
+from clipper.api import ForUClient, Offer, AuthExpired, ClipError, ApiError
 
 BASE = "https://www.vons.com"
 
@@ -123,6 +123,18 @@ def test_clip_401_raises_authexpired():
     )
     with pytest.raises(AuthExpired):
         ForUClient(_config(), _session()).clip(Offer("1", "U", "Milk", "SC"))
+
+
+@responses.activate
+def test_get_offers_unexpected_shape_raises_apierror():
+    responses.add(
+        responses.GET,
+        f"{BASE}/abs/pub/xapi/offers/companiongalleryoffer",
+        json={"somethingElse": []},
+        status=200,
+    )
+    with pytest.raises(ApiError):
+        ForUClient(_config(), _session()).get_offers()
 
 
 def test_clip_without_ibm_creds_raises_clear_error():

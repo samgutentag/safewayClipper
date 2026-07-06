@@ -24,6 +24,10 @@ class ClipError(Exception):
     pass
 
 
+class ApiError(Exception):
+    pass
+
+
 @dataclass
 class Offer:
     offer_id: str
@@ -79,14 +83,17 @@ class ForUClient:
                 "includeRedmBonusPathFPOffers": "true",
             },
             headers=headers,
+            timeout=(10, 30),
         )
         self._raise_if_auth(resp)
         resp.raise_for_status()
         body = resp.json()
-        return [
-            Offer.from_dict(o)
-            for o in body.get("companionGalleryOfferList", [])
-        ]
+        if "companionGalleryOfferList" not in body:
+            raise ApiError(
+                "Unexpected offers response shape (no 'companionGalleryOfferList'); "
+                "the vons.com API contract may have changed."
+            )
+        return [Offer.from_dict(o) for o in body["companionGalleryOfferList"]]
 
     def clip(self, offer: Offer) -> None:
         if not self.config.ibm_client_id or not self.config.ibm_client_secret:
@@ -98,8 +105,8 @@ class ForUClient:
         headers = {
             "swy_sso_token": self._token,
             "x-swyconsumerdirectorypro": self._token,
-            "x-ibm-client-id": self.config.ibm_client_id or "",
-            "x-ibm-client-secret": self.config.ibm_client_secret or "",
+            "x-ibm-client-id": self.config.ibm_client_id,
+            "x-ibm-client-secret": self.config.ibm_client_secret,
             "x-swy-correlation-id": str(uuid.uuid4()),
             "X-SWY_API_KEY": self.config.api_key,
             "X-SWY_BANNER": self.config.banner,
@@ -123,6 +130,7 @@ class ForUClient:
             params={"storeId": self._store_id},
             data=json.dumps(payload),
             headers=headers,
+            timeout=(10, 30),
         )
         self._raise_if_auth(resp)
         resp.raise_for_status()

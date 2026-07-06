@@ -44,3 +44,17 @@ def test_atomic_write_leaves_no_temp(tmp_path):
     save_session(p, _valid_session())
     leftovers = [x.name for x in tmp_path.iterdir() if x.name != "session.json"]
     assert leftovers == []
+
+
+def test_malformed_session_raises_sessionerror(tmp_path):
+    p = tmp_path / "session.json"
+    p.write_text("{not json")
+    with pytest.raises(SessionError):
+        load_session(p)
+
+
+def test_missing_key_raises_sessionerror(tmp_path):
+    p = tmp_path / "session.json"
+    p.write_text("{}")
+    with pytest.raises(SessionError):
+        load_session(p)

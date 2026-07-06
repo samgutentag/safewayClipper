@@ -1,4 +1,4 @@
 # for-U clipper: clip coupons every night at 2am.
 # flock guards against a run overlapping the previous one if a night runs long.
 # Adjust the path to wherever you cloned the repo on the Pi.
-0 2 * * * cd /home/pi/foru-clipper && /usr/bin/flock -n .clip.lock .venv/bin/clipper clip >> logs/cron.log 2>&1
+0 2 * * * cd /home/pi/foru-clipper && mkdir -p logs && /usr/bin/flock -n .clip.lock .venv/bin/clipper clip >> logs/cron.log 2>&1

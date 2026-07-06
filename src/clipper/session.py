@@ -44,12 +44,15 @@ class Session:
 
 def load_session(path: Path) -> Session:
     with open(path, "rb") as f:
-        data = json.load(f)
-    return Session(
-        cookies=data["cookies"],
-        captured_at=data["captured_at"],
-        last_used=data.get("last_used"),
-    )
+        try:
+            data = json.load(f)
+            return Session(
+                cookies=data["cookies"],
+                captured_at=data["captured_at"],
+                last_used=data.get("last_used"),
+            )
+        except (json.JSONDecodeError, KeyError, TypeError) as e:
+            raise SessionError(f"Malformed session file {path}: {e}") from e
 
 
 def save_session(path: Path, session: Session) -> None:

@@ -67,10 +67,18 @@ def run_login(config: Config) -> int:
                 timeout=60,
             )
         except subprocess.TimeoutExpired:
-            print("rsync timed out after 60s; Pi may be unreachable.")
+            print(
+                "Session saved locally, but push to the Pi failed: rsync timed out "
+                "after 60s; Pi may be unreachable. Copy it over manually or re-run "
+                "once the Pi is reachable."
+            )
             return 1
         if result.returncode != 0:
-            print(f"rsync failed: {result.stderr.strip()}")
+            print(
+                f"Session saved locally, but push to the Pi failed: "
+                f"{result.stderr.strip()}. Copy it over manually or re-run once "
+                "the Pi is reachable."
+            )
             return 1
         print("Session pushed to Pi.")
     else:
